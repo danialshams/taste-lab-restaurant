@@ -34,7 +34,8 @@ assert(css.includes('.food-pizza-emerge-v7')&&css.includes('max-width:190px'),"K
 assert(css.includes('.food-pizza-emerge-v7 [data-pizza-wedge]:not('),"Hide upcoming slices until they actually emerge");
 const wedgeStyle=css.match(/\.food-pizza-emerge-v7 \[data-pizza-wedge\]\s*\{([^}]+)\}/);
 assert(wedgeStyle,"Pizza slice selector needs explicit CSS declaration");
-assert(!/transform-(?:box|origin)|transform\s*:/.test(wedgeStyle[1]),
+const wedgeDeclarations=wedgeStyle[1].replace(/\/\*[\s\S]*?\*\//g,"");
+assert(!/transform-(?:box|origin)|transform\s*:/.test(wedgeDeclarations),
  "DO NOT set CSS transform-origin/transform-box on pizza wedge: it moves each 110,110 SVG pivot off-center (visually reproduced bug)");
 assert(pizza.includes('rot(g,state.angle)')&&pizza.includes('rotate("+angle.toFixed(3)+" 110 110)'),
  "Use exactly one SVG attribute pivot at 110,110, never a competing CSS transform");
