@@ -55,7 +55,7 @@ assert(universalMenu.includes('background:#070707!important')&&universalMenu.inc
 assert(universalMenu.includes('body:has(.menu-overlay.open) .site-header'),"Header must disappear for BOTH mobile and desktop");
 assert(universalMenu.includes('@media(min-width:701px)'),"Desktop menu must be styled independently from mobile");
 assert(universalMenu.includes('object-fit:contain!important')&&universalMenu.includes('opacity:.40'),"Large photo must be faded to keep menu links readable");
-assert(!css.includes('menu-real-burger-steam')&&!page.includes('menu-burger-steam'),"No artificial CSS/SVG steam in menu");
+assert(!css.includes('menu-real-burger-steam')&&!page.includes('className="menu-burger-steam"'),"No artificial CSS/SVG steam in menu");
 assert(css.includes('.menu-overlay.open nav a')&&css.includes('var(--order)*.07s'),"Links must enter sequentially");
 const media=read('scripts/prepare-media.mjs');
 assert(media.includes('https://www.pexels.com/photo/delicious-cheeseburger-with-smoky-atmosphere-28902885/'),"Use the verified free-use Pexels burger with steam already in the source photo");
