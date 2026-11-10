@@ -20,7 +20,7 @@ assert(layout.includes('food-motion.css'),"Food motion CSS must load");
  * their immediate predecessor. No angular mask or drawing reveal.
  * Painted from 7 to 0 means predecessors naturally cover new slices at spawn. */
 const pizza=loader.slice(loader.indexOf('const PIZZA_START_KEY='),loader.indexOf('export function BurgerIllustration()'));
-assert(pizza.includes('taste-pizza-emerge-started-v7'),"New intro version must play in fresh sessions");
+assert(pizza.includes('taste-pizza-emerge-started-v8'),"New intro version must play in fresh sessions");
 assert(pizza.includes('Array.from({length:8},(_,i)=>7-i)'),"Reverse SVG paint order required");
 assert(pizza.includes('data-pizza-wedge={index}'),"All eight textured wedges must exist");
 assert(pizza.includes('translate(110 110) scale(.955 1) translate(-110 -110)'),"Add a slight gap without changing slice details");
