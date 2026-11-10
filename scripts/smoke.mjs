@@ -44,6 +44,15 @@ try{
   assert.equal(picture.subarray(0,8).toString("hex"),"89504e470d0a1a0a","Hamburger file is not a real PNG");
   assert([3,4,6].includes(picture[25]),"Hamburger photo must support transparency");
   console.log("Real photographic burger PNG OK ("+picture.length+" bytes)");
+  const optimized=await request("/_next/image?url=%2Fmedia%2Fmenu-burger.png&w=640&q=82");
+  assert.equal(optimized.status,200,"Mobile responsive Next.js burger image optimization failed");
+  assert((optimized.headers.get("content-type")||"").startsWith("image/"),
+    "Optimized burger image missing valid image media type");
+  const mobileBytes=(await optimized.arrayBuffer()).byteLength;
+  assert(mobileBytes>15000&&mobileBytes<picture.length,
+    "Mobile burger image must transfer fewer bytes than original photograph");
+  console.log("Mobile optimized burger OK: "+mobileBytes+" of "+picture.length+" bytes");
+
  console.log("Production smoke passed: homepage and all eight real local images, pizza, burger and pasta scene");
 }finally{
  server.kill("SIGTERM");
