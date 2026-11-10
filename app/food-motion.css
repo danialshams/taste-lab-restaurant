@@ -65,3 +65,81 @@ body:has(.food-intro){overflow:hidden}
  .food-icon,.dish-card,.menu-section .menu-head i{animation:none!important;transition:none!important}
  .food-burger-layer{opacity:1!important;transform:none!important}
 }
+
+
+/* V4: sequential pizza, auto-play burger, and the pasta table ritual. */
+html{scroll-behavior:auto}
+.food-pizza-slice{transform-origin:110px 110px}
+.food-pizza-slice:not(.fixed){opacity:0}
+.food-pizza-slice.fixed{opacity:1}
+.food-pizza-disc{filter:drop-shadow(0 10px 15px #60251433)}
+.food-pasta-ritual{min-height:100svh;position:relative;display:grid;grid-template-columns:minmax(0,57%) minmax(0,43%);align-items:center;overflow:hidden;background:#f6e6cc;color:#2a241c;direction:ltr;padding:95px clamp(22px,4vw,75px) 80px}
+.food-pasta-ritual:before{content:"";position:absolute;inset:25px;border:1px solid #a97f532b;pointer-events:none}
+.food-pasta-index{position:absolute;left:clamp(30px,5vw,85px);top:45px;font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.16em;color:#a55245}
+.food-pasta-scene{grid-column:1;min-width:0;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative}
+.food-pasta-art{width:min(700px,100%);height:auto;display:block;overflow:visible;filter:drop-shadow(0 12px 12px #653b2426)}
+.food-pasta-cloth,.food-pasta-plate,.food-pasta-fork,.food-pasta-spoon,.food-pasta-garnish,.food-pasta-sauce,.food-pasta-noodle{transform-box:view-box;transform-origin:center}
+.food-pasta-scene-label{font:600 10px 'Space Grotesk',sans-serif;color:#ad6150;letter-spacing:.1em;opacity:.9;text-align:center;margin-top:-8px}
+.food-pasta-copy{grid-column:2;direction:rtl;text-align:right;align-self:end;max-width:485px;padding:0 5% 50px 0}
+.food-pasta-copy>.tiny-label{font:700 12px 'Space Grotesk',sans-serif;letter-spacing:.13em;color:#b14835}
+.food-pasta-copy h2{font-size:clamp(49px,5vw,93px);line-height:1.22;letter-spacing:-.075em;font-weight:900;margin:17px 0 23px}
+.food-pasta-copy h2 em{font-style:normal;color:#c34c37}
+.food-pasta-copy p{max-width:350px;line-height:2.25;font-size:14px;margin:0 0 26px;color:#6a574c}
+.food-pasta-link{display:inline-flex;align-items:center;gap:18px;border-bottom:1px solid #693d32;padding:8px 0;font-size:13px;transition:gap .3s ease}
+.food-pasta-link:hover{gap:26px}
+.food-pasta-link span{font:600 25px 'Space Grotesk',sans-serif}
+.food-burger-builder{overflow:hidden}
+.food-burger-builder:before{pointer-events:none}
+.food-burger-layer{transform-origin:center center;transform-box:fill-box}
+.food-burger-builder .food-burger-copy h2{will-change:opacity,transform}
+.food-pasta-art .food-pasta-noodle path{paint-order:stroke fill}
+.story-badge{gap:3px;transform:rotate(11deg)}
+.story-badge>svg{color:#d34b29;transition:transform .5s cubic-bezier(.2,1.5,.4,1)}
+.story-badge:hover>svg{transform:rotate(22deg) scale(1.15)}
+.story-badge span{font:700 9px/1.2 'Space Grotesk',sans-serif;letter-spacing:.13em}
+.hero-eyebrow span{display:inline-flex;vertical-align:middle;margin-inline-start:6px}
+.hero-eyebrow svg{color:#ffd16f;animation:food-icon-breath 4s ease-in-out infinite}
+@keyframes food-icon-breath{0%,83%,100%{transform:rotate(0)}88%{transform:rotate(12deg)}94%{transform:rotate(-12deg)}}
+.menu-section .dish-card [data-food-card-detail]{transition:transform .35s ease}
+.menu-section .dish-card:hover [data-food-card-detail]{transform:translateY(-3px)}
+.dish-photo{transition:background-size .65s ease,filter .55s ease}
+.dish-card:hover .dish-photo{filter:saturate(1.09)}
+.faq-section .faq-item button{transition:color .25s ease}
+.faq-section .faq-item button:hover{color:var(--red)}
+.faq-section .faq-item button .faq-plus{width:35px;text-align:center;display:inline-flex;justify-content:center;align-items:center;transition:transform .45s cubic-bezier(.22,1.5,.35,1),color .3s;transform-origin:center;color:var(--red)}
+.faq-section .faq-item.expanded button .faq-plus{transform:rotate(45deg)}
+.faq-section .faq-answer p{transition:opacity .38s,transform .38s;opacity:0;transform:translateY(-10px)}
+.faq-section .faq-item.expanded .faq-answer p{opacity:1;transform:translateY(0)}
+.faq-list .faq-item{transform-origin:top}
+.site-footer a:not(.brand){transition:color .3s,transform .3s;display:inline-block}
+.site-footer a:not(.brand):hover{color:#ffd477;transform:translateX(-5px)}
+@media (max-width:1100px){
+ .food-pasta-ritual{grid-template-columns:56% 44%;padding:80px 20px 80px}
+ .food-pasta-copy h2{font-size:clamp(47px,5vw,65px)}
+ .food-pasta-copy{padding-bottom:20px}
+}
+@media (max-width:899px){
+ .food-pasta-ritual{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:85px 18px 70px;min-height:0}
+ .food-pasta-ritual:before{inset:12px}
+ .food-pasta-index{left:25px;top:35px;font-size:9px}
+ .food-pasta-scene{width:100%;max-width:620px}
+ .food-pasta-art{width:min(100%,610px)}
+ .food-pasta-copy{align-self:stretch;text-align:right;max-width:640px;margin:0 auto;padding:0 18px 10px;width:100%}
+ .food-pasta-copy h2{font-size:clamp(47px,8.3vw,75px);line-height:1.28}
+ .food-pasta-copy p{font-size:13px}
+ .food-pasta-scene-label{font-size:8px}
+}
+@media (max-width:600px){
+ .food-pizza-disc{width:min(285px,72vw)}
+ .food-pasta-ritual{padding:80px 12px 68px}
+ .food-pasta-copy{padding:0 16px}
+ .food-pasta-copy h2{font-size:clamp(43px,10.5vw,64px)}
+ .food-pasta-copy .tiny-label{font-size:10px}
+ .food-pasta-scene-label{letter-spacing:0;font-size:7px}
+ .faq-section .faq-item button{font-size:16px}
+ .food-burger-builder{overflow:hidden}
+}
+@media(prefers-reduced-motion:reduce){
+ .food-pasta-ritual *,.food-burger-builder *{animation:none!important;transition:none!important}
+ .food-pasta-scene svg g,.food-pasta-copy>*,.food-pasta-scene-label,.food-burger-finish,.food-burger-copy h2,.faq-item{opacity:1!important;visibility:visible!important;transform:none!important}
+}

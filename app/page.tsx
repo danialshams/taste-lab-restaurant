@@ -1,6 +1,7 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FoodIcon,PizzaIntro,BurgerIllustration,type FoodKind} from "../components/FoodIllustrations";
+import PastaRitual from "../components/PastaRitual";
 import gsap from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -27,28 +28,79 @@ const dishes=[
 
 function Arrow({size=24}:{size?:number}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6 6 18M18 6H8M18 6v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 function Brand(){return <a className="brand" href="#top" aria-label="TASTE LAB - خانه" dir="ltr"><span className="brand-star"><FoodIcon kind="همه" size={33}/></span><span>TASTE<span className="brand-light">LAB</span></span><small>FOOD EXPERIMENTS</small></a>}
+
 function useAnimations(ready:boolean){
  useEffect(()=>{
   if(!ready)return;
   gsap.registerPlugin(ScrollTrigger);
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  let lenis:Lenis|undefined,tick:((t:number)=>void)|undefined;
-  if(matchMedia("(pointer:fine)").matches){lenis=new Lenis({duration:1.05,smoothWheel:true,anchors:true});tick=(t:number)=>lenis?.raf(t*1000);gsap.ticker.add(tick);lenis.on("scroll",ScrollTrigger.update)}
+  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduced)return;
+  let lenis:Lenis|undefined, tick:((t:number)=>void)|undefined;
+  if(window.matchMedia("(pointer:fine)").matches){
+   lenis=new Lenis({duration:1.02,smoothWheel:true,anchors:true});
+   tick=(time:number)=>lenis?.raf(time*1000);
+   gsap.ticker.add(tick);
+   lenis.on("scroll",ScrollTrigger.update);
+  }
   const ctx=gsap.context(()=>{
-   gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach(el=>gsap.fromTo(el,{y:45,autoAlpha:0},{y:0,autoAlpha:1,duration:.9,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 92%",once:true}}));
-   gsap.fromTo(".hero-heading span",{y:"110%"},{y:"0%",stagger:.12,duration:1.15,ease:"power4.out"});
-   gsap.to(".hero-photo",{yPercent:9,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
-   const burger=document.querySelector(".food-burger-builder");
-   if(burger){
-    const layers=Array.from(burger.querySelectorAll<SVGElement>(".food-burger-layer"));
-    const pin=matchMedia("(min-width: 900px)").matches;
-    const assemble=gsap.timeline({scrollTrigger:{trigger:burger,start:pin?"top top":"top 80%",end:pin?"+=1650":"bottom 40%",scrub:.7,pin,anticipatePin:1,invalidateOnRefresh:true}});
-    layers.forEach((layer,i)=>assemble.fromTo(layer,{y:-265-i*31,autoAlpha:0,rotation:i%2?5:-4},{y:0,autoAlpha:1,rotation:0,duration:.72,ease:"power2.out"},i*.48));
-    assemble.fromTo(".food-burger-finish",{autoAlpha:0,y:35},{autoAlpha:1,y:0,duration:.7},">-.1");
+   gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach(el=>{
+    gsap.fromTo(el,{y:35,autoAlpha:0},{
+      y:0,autoAlpha:1,duration:.94,ease:"power3.out",
+      scrollTrigger:{trigger:el,start:"top 91%",once:true}
+    });
+   });
+   gsap.fromTo(".hero-heading span",{y:"110%"},{y:"0%",stagger:.13,duration:1.13,ease:"power4.out"});
+   gsap.to(".hero-photo",{yPercent:8,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
+   // Reaches the burger => play ONE standalone GSAP timeline, independent from scrolling.
+   const burger=document.querySelector<HTMLElement>(".food-burger-builder");
+   const burgerStage=burger?.querySelector<HTMLElement>(".food-burger-stage");
+   if(burger&&burgerStage){
+    const layers=Array.from(burgerStage.querySelectorAll<SVGElement>(".food-burger-layer"));
+    const burgerTL=gsap.timeline({paused:true});
+    layers.forEach((layer,i)=>burgerTL.fromTo(layer,{
+      y:-280-i*34,autoAlpha:0,rotation:i%2===0?-4:4,
+    },{
+      y:0,autoAlpha:1,rotation:0,duration:.79,ease:"back.out(1.15)"
+    },i*.36));
+    burgerTL.fromTo(".food-burger-finish",{autoAlpha:0,y:22},{autoAlpha:1,y:0,duration:.45},">-.1");
+    burgerTL.fromTo(".food-burger-copy h2",{autoAlpha:.6,y:14},{autoAlpha:1,y:0,duration:.55},">-.15");
+    ScrollTrigger.create({
+      trigger:burgerStage,start:"top 87%",once:true,onEnter:()=>burgerTL.play()
+    });
    }
+   // The pasta scene has its OWN playhead, triggered on arrival, never scrubbed or pinned.
+   const pasta=document.querySelector<HTMLElement>(".food-pasta-ritual");
+   if(pasta){
+    const timeline=gsap.timeline({paused:true});
+    timeline.fromTo(".food-pasta-cloth",{scale:0,rotation:-26,autoAlpha:0,transformOrigin:"50% 50%"},{scale:1,rotation:0,autoAlpha:1,duration:.82,ease:"back.out(1.08)"},0);
+    timeline.fromTo(".food-pasta-plate",{y:-195,scale:.9,autoAlpha:0},{y:0,scale:1,autoAlpha:1,duration:.72,ease:"back.out(1.08)"},.62);
+    timeline.fromTo(".food-pasta-fork",{x:-270,rotation:-14,autoAlpha:0},{x:0,rotation:0,autoAlpha:1,duration:.74,ease:"power3.out"},1.13);
+    timeline.fromTo(".food-pasta-spoon",{x:270,rotation:14,autoAlpha:0},{x:0,rotation:0,autoAlpha:1,duration:.74,ease:"power3.out"},1.2);
+    timeline.fromTo(".food-pasta-sauce",{scale:.65,autoAlpha:0,transformOrigin:"50% 50%"},{scale:1,autoAlpha:1,duration:.52,ease:"power2.out"},1.6);
+    const noodles=gsap.utils.toArray<SVGGElement>(".food-pasta-noodle");
+    timeline.fromTo(noodles,{y:-220,autoAlpha:0,rotation:-8},{y:0,autoAlpha:1,rotation:0,duration:.72,stagger:.105,ease:"back.out(1.03)"},1.77);
+    timeline.fromTo(".food-pasta-garnish",{scale:.45,autoAlpha:0,transformOrigin:"50% 50%"},{scale:1,autoAlpha:1,duration:.48,ease:"back.out(1.4)"},3.44);
+    timeline.fromTo(".food-pasta-copy > *",{autoAlpha:0,y:26},{autoAlpha:1,y:0,stagger:.13,duration:.68,ease:"power3.out"},3.55);
+    timeline.fromTo(".food-pasta-scene-label",{autoAlpha:0},{autoAlpha:1,duration:.4},3.75);
+    ScrollTrigger.create({
+      trigger:".food-pasta-scene",start:"top 85%",once:true,onEnter:()=>timeline.play()
+    });
+   }
+   gsap.fromTo(".dish-card",{y:48,autoAlpha:0},{y:0,autoAlpha:1,stagger:.13,duration:.74,ease:"power3.out",
+     scrollTrigger:{trigger:".dish-grid",start:"top 86%",once:true}});
+   gsap.fromTo(".faq-item",{y:25,autoAlpha:0},{y:0,autoAlpha:1,stagger:.13,duration:.65,ease:"power2.out",
+     scrollTrigger:{trigger:".faq-list",start:"top 85%",once:true}});
+   gsap.fromTo(".final-cta > *",{y:30,autoAlpha:0},{y:0,autoAlpha:1,stagger:.17,duration:.78,ease:"power3.out",
+     scrollTrigger:{trigger:".final-cta",start:"top 87%",once:true}});
+   gsap.fromTo(".site-footer > *",{y:25,autoAlpha:0},{y:0,autoAlpha:1,stagger:.15,duration:.7,ease:"power2.out",
+     scrollTrigger:{trigger:".site-footer",start:"top 93%",once:true}});
   });
   ScrollTrigger.refresh();
-  return()=>{ctx.revert();if(tick)gsap.ticker.remove(tick);lenis?.destroy();ScrollTrigger.getAll().forEach(t=>t.kill())}
+  return()=>{
+    ctx.revert();
+    if(tick)gsap.ticker.remove(tick);
+    lenis?.destroy();
+  };
  },[ready]);
 }
 
@@ -58,19 +110,19 @@ export default function Page(){
  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"){close();setReserveOpen(false)}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey)},[]);
  useEffect(()=>{document.body.style.overflow=navOpen||reserveOpen?"hidden":"";return()=>{document.body.style.overflow=""}},[navOpen,reserveOpen]);
  return <><PizzaIntro done={finishIntro}/><div className={`site-wrap ${ready?"site-ready":""}`} id="top">
- <header className="site-header"><Brand/><div className="header-links"><a href="#story">داستان ما</a><a href="#menu">منوی غذا</a><a href="#experience">تجربه</a></div><div className="header-actions"><button className="book-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>رزرو میز <Arrow size={17}/></button><button className="menu-toggle" aria-label={navOpen?"بستن منو":"باز کردن منوی پیتزایی"} aria-expanded={navOpen} onClick={()=>setNavOpen(v=>!v)}><FoodIcon kind="پیتزا" size={29}/><span>{navOpen?"بستن":"منو"}</span></button></div></header>
- <div className={`menu-overlay ${navOpen?"open":""}`} aria-hidden={!navOpen}><div className="menu-overlay-top"><span>MENU / 01</span><button onClick={close}>بستن ✕</button></div><nav aria-label="ناوبری سایت">{[["خانه","#top"],["داستان ما","#story"],["منوی غذا","#menu"],["تجربه لب","#experience"],["رزرو میز","#booking"]].map(([t,h],i)=><a key={h} style={{"--order":i} as React.CSSProperties} href={h} onClick={e=>{close();if(h==="#booking"){e.preventDefault();setSubmitted(false);setReserveOpen(true)}}}><span>0{i+1}</span>{t}<Arrow size={36}/></a>)}</nav><div className="overlay-bottom">GOOD FOOD. NO RULES. <span><FoodIcon kind="پیتزا" size={24}/></span></div></div>
+ <header className="site-header"><Brand/><div className="header-links"><a href="#story">داستان ما</a><a href="#menu">منوی غذا</a><a href="#pasta-ritual">پاستا</a><a href="#experience">تجربه</a></div><div className="header-actions"><button className="book-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>رزرو میز <Arrow size={17}/></button><button className={"menu-toggle"+(navOpen?" is-open":"")} aria-label={navOpen?"بستن منو":"باز کردن منوی پیتزایی"} aria-expanded={navOpen} onClick={()=>setNavOpen(v=>!v)}><FoodIcon kind="پیتزا" size={29}/><span>{navOpen?"بستن":"منو"}</span></button></div></header>
+ <div className={`menu-overlay ${navOpen?"open":""}`} aria-hidden={!navOpen}><div className="menu-overlay-top"><span>MENU / 01</span><button onClick={close}>بستن ✕</button></div><nav aria-label="ناوبری سایت">{[["خانه","#top"],["داستان ما","#story"],["منوی غذا","#menu"],["مراسم پاستا","#pasta-ritual"],["تجربه لب","#experience"],["رزرو میز","#booking"]].map(([t,h],i)=><a key={h} style={{"--order":i} as React.CSSProperties} href={h} onClick={e=>{close();if(h==="#booking"){e.preventDefault();setSubmitted(false);setReserveOpen(true)}}}><span>0{i+1}</span>{t}<Arrow size={36}/></a>)}</nav><div className="overlay-bottom">GOOD FOOD. NO RULES. <span><FoodIcon kind="پیتزا" size={24}/></span></div></div>
  <main>
- <section className="hero" aria-labelledby="hero-title"><div className="hero-picture"><div className="hero-photo" style={{backgroundImage:`linear-gradient(90deg,rgba(15,15,13,.42),rgba(15,15,13,.04)),url('${photos.hero}')`}}/><div className="hero-overlay"/><div className="hero-index">TASTE LAB / FRESH & BOLD / 2026</div><div className="hero-center"><div className="hero-eyebrow" data-reveal>خوشمزه‌تر از چیزی که فکر می‌کنی <span>🍕</span></div><h1 id="hero-title" className="hero-heading"><span>طعم رو</span><span className="hero-heading-outline">زندگی کن.</span></h1><p className="hero-lead">اینجا غذا یه قانون نداره؛ یه ماجراجوییه.</p><a href="#menu" className="hero-round-cta" aria-label="کشف منو"><Arrow size={34}/><span>کشف منو</span></a></div><div className="hero-footer"><span>۰۱ / ۰۵</span><span>برای کشف بیشتر اسکرول کن ↓</span><span>GOOD FOOD. NO RULES.</span></div></div></section>
- <div className="running-strip" aria-hidden="true"><div>{Array.from({length:4},(_,i)=><span key={i}>JUST ONE MORE SLICE <b><FoodIcon kind="پیتزا" size={23}/></b> MADE WITH LOVE <b>🍕</b> NO BORING BITES <b>🍕</b></span>)}</div></div>
- <section className="story content-grid" id="story"><div className="section-aside" data-reveal>01 — داستان آزمایشگاه</div><div className="story-content"><div className="tiny-label" data-reveal>WHAT WE BELIEVE <span>🍕</span></div><h2 data-reveal>ما غذا رو<br/><em>جدی نمی‌گیریم،</em><br/>طعمش رو چرا.</h2><p data-reveal>از اولین برش پیتزا تا آخرین جرعه نوشیدنی، هر جزئیات فرصتیه برای ساختن یک تجربه متفاوت. دستورهای تکراری رو کنار گذاشتیم تا هر بار چیز تازه‌ای کشف کنی.</p><a href="#experience" className="inline-link">درباره تجربه لب <Arrow size={24}/></a></div><div className="story-badge" aria-hidden="true">100%<span>FRESH<br/>IDEAS</span></div></section>
+ <section className="hero" aria-labelledby="hero-title"><div className="hero-picture"><div className="hero-photo" style={{backgroundImage:`linear-gradient(90deg,rgba(15,15,13,.42),rgba(15,15,13,.04)),url('${photos.hero}')`}}/><div className="hero-overlay"/><div className="hero-index">TASTE LAB / FRESH & BOLD / 2026</div><div className="hero-center"><div className="hero-eyebrow" data-reveal>خوشمزه‌تر از چیزی که فکر می‌کنی <span><FoodIcon kind="پیتزا" size={23}/></span></div><h1 id="hero-title" className="hero-heading"><span>طعم رو</span><span className="hero-heading-outline">زندگی کن.</span></h1><p className="hero-lead">اینجا غذا یه قانون نداره؛ یه ماجراجوییه.</p><a href="#menu" className="hero-round-cta" aria-label="کشف منو"><Arrow size={34}/><span>کشف منو</span></a></div><div className="hero-footer"><span>۰۱ / ۰۷</span><span>برای کشف بیشتر اسکرول کن ↓</span><span>GOOD FOOD. NO RULES.</span></div></div></section>
+ <div className="running-strip" aria-hidden="true"><div>{Array.from({length:4},(_,i)=><span key={i}>JUST ONE MORE SLICE <b><FoodIcon kind="پیتزا" size={23}/></b> MADE WITH LOVE <b><FoodIcon kind="همه" size={23}/></b> NO BORING BITES <b><FoodIcon kind="برگر" size={23}/></b></span>)}</div></div>
+ <section className="story content-grid" id="story"><div className="section-aside" data-reveal>01 — داستان آزمایشگاه</div><div className="story-content"><div className="tiny-label" data-reveal>WHAT WE BELIEVE <span><FoodIcon kind="همه" size={25}/></span></div><h2 data-reveal>ما غذا رو<br/><em>جدی نمی‌گیریم،</em><br/>طعمش رو چرا.</h2><p data-reveal>از اولین برش پیتزا تا آخرین جرعه نوشیدنی، هر جزئیات فرصتیه برای ساختن یک تجربه متفاوت. دستورهای تکراری رو کنار گذاشتیم تا هر بار چیز تازه‌ای کشف کنی.</p><a href="#experience" className="inline-link">درباره تجربه لب <Arrow size={24}/></a></div><div className="story-badge" aria-hidden="true"><FoodIcon kind="پیتزا" size={67}/><span>MADE FRESH</span></div></section>
  <section className="food-burger-builder" id="burger-build" aria-labelledby="burger-title">
-  <div className="food-burger-copy"><span className="tiny-label">02 / BUILD THE BITE</span><h2 id="burger-title">هر لایه،<br/><em>یه دلیل برای<br/>عاشق‌شدن.</em></h2><p>از نان برشته تا گوشت آبدار، همه‌چی سر جای خودش می‌شینه. اسکرول کن و برگرمون رو لایه‌به‌لایه بساز.</p><div className="food-burger-labels" aria-label="مواد برگر"><span>نان کنجدی</span><span>کاهوی تازه</span><span>گوجه</span><span>چدار</span><span>گوشت</span></div><span className="food-burger-finish">THE PERFECT STACK / 06 LAYERS</span></div>
-  <div className="food-burger-stage"><BurgerIllustration/><span className="food-burger-stage-note" dir="ltr">BUILDING YOUR CRAVING · ↓</span></div>
- </section><section className="menu-section" id="menu"><div className="menu-head"><div><span className="tiny-label" data-reveal>02 — THE EXPERIMENTS</span><h2 data-reveal>چی میل داری؟ <i><FoodIcon kind="پیتزا" size={37}/></i></h2></div><p data-reveal>از آشپزخونه ما تا میز تو. با دست درست‌شده، با عشق سرو‌شده.</p></div><div className="filter-row" role="group" aria-label="فیلتر دسته غذاها">{categories.map(c=><button key={c} onClick={()=>setCategory(c)} aria-pressed={category===c} className={category===c?"active":""}><FoodIcon kind={c as FoodKind} size={30}/><span>{c}</span></button>)}</div><div className="dish-grid">{list.map(d=><article className="dish-card" key={d.id}><div className="dish-photo" style={{backgroundImage:`url('${d.image}')`}}><span className="dish-badge">{d.tag}</span><div className="dish-photo-icon"><FoodIcon kind={d.category as FoodKind} size={27}/></div></div><div className="dish-meta"><span>{d.english}</span><span>{d.category}</span></div><div className="dish-name"><h3>{d.title}</h3><strong>{d.price} <small>هزار تومان</small></strong></div><p>{d.description}</p></article>)}</div><div className="menu-bottom"><span>مزه‌ها برای همه‌اند، قوانین نه.</span><button className="dark-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>یه میز رزرو کن <Arrow size={21}/></button></div></section>
- <section className="experience" id="experience"><div className="experience-image" style={{backgroundImage:`url('${photos.table}')`}}/><div className="experience-cover"/><div className="experience-content"><span className="tiny-label" data-reveal>03 — THE GOOD TIMES</span><h2 data-reveal>اینجا فقط<br/>غذا نمی‌خوریم؛<br/><em>خاطره می‌سازیم.</em></h2><p data-reveal>برای قرارهای بی‌برنامه، خنده‌های بلند و شب‌هایی که دلت نمی‌خواد تموم بشن.</p><button onClick={()=>{setSubmitted(false);setReserveOpen(true)}} className="white-pill">یه جا برام نگه دار <Arrow size={20}/></button></div><span className="experience-side">FRESH STORIES EVERY DAY — TASTE LAB</span></section>
- <section className="manifesto"><div className="manifesto-number">04 / NOT AN ORDINARY KITCHEN</div><div className="manifesto-image" style={{backgroundImage:`url('${photos.chef}')`}}/><div className="manifesto-text"><span className="tiny-label" data-reveal>EVERYTHING FROM SCRATCH</span><h2 data-reveal>کمتر تکرار،<br/><span>بیشتر خلاقیت.</span></h2><p data-reveal>مواد اولیه تازه، ترکیب‌های غیرمنتظره و تیمی که عاشق امتحان‌کردن چیزهای جدیده. هر بشقاب، امضای خودشو داره.</p><div className="manifesto-stamp">MADE DIFFERENTLY <span>🍕</span></div></div></section>
- <section className="faq-section"><div className="faq-head"><span>05 — قبل از اومدن</span><h2 data-reveal>چند سؤال خوشمزه</h2></div><div className="faq-list">{[["رزرو میز الزامیه؟","نه، بدون رزرو هم می‌تونی بیای؛ اما برای روزهای شلوغ بهتره از قبل هماهنگ کنی."],["غذای گیاهی هم دارید؟","بله. در بخش منو چند گزینه گیاهی داریم و ترکیب منو به‌صورت فصلی تغییر می‌کنه."],["این سایت امکان ثبت سفارش آنلاین داره؟","این نسخه یک دموی طراحی رستوران است؛ رزرو و پرداخت واقعی بعد از اتصال به سرویس مربوط فعال می‌شود."]].map(([q,a],i)=><div className={`faq-item ${faq===i?"expanded":""}`} key={i}><button aria-expanded={faq===i} onClick={()=>setFaq(faq===i?-1:i)}><span>0{i+1}</span>{q}<b>{faq===i?"−":"+"}</b></button><div className="faq-answer"><p>{a}</p></div></div>)}</div></section>
+  <div className="food-burger-copy"><span className="tiny-label">02 / BUILD THE BITE</span><h2 id="burger-title">هر لایه،<br/><em>یه دلیل برای<br/>عاشق‌شدن.</em></h2><p>از نان برشته تا گوشت آبدار، همه‌چی سر جای خودش می‌شینه. وقتی به این بخش می‌رسی، مواد برگر خودشون لایه‌به‌لایه کنار هم می‌شینن.</p><div className="food-burger-labels" aria-label="مواد برگر"><span>نان کنجدی</span><span>کاهوی تازه</span><span>گوجه</span><span>چدار</span><span>گوشت</span></div><span className="food-burger-finish">THE PERFECT STACK / 06 LAYERS</span></div>
+  <div className="food-burger-stage"><BurgerIllustration/><span className="food-burger-stage-note" dir="ltr">ASSEMBLED WITH LOVE</span></div>
+ </section><PastaRitual/><section className="menu-section" id="menu"><div className="menu-head"><div><span className="tiny-label" data-reveal>04 — THE EXPERIMENTS</span><h2 data-reveal>چی میل داری؟ <i><FoodIcon kind="پیتزا" size={37}/></i></h2></div><p data-reveal>از آشپزخونه ما تا میز تو. با دست درست‌شده، با عشق سرو‌شده.</p></div><div className="filter-row" role="group" aria-label="فیلتر دسته غذاها">{categories.map(c=><button key={c} onClick={()=>setCategory(c)} aria-pressed={category===c} className={category===c?"active":""}><FoodIcon kind={c as FoodKind} size={30}/><span>{c}</span></button>)}</div><div className="dish-grid">{list.map(d=><article className="dish-card" key={d.id}><div className="dish-photo" style={{backgroundImage:`url('${d.image}')`}}><span className="dish-badge">{d.tag}</span><div className="dish-photo-icon"><FoodIcon kind={d.category as FoodKind} size={27}/></div></div><div className="dish-meta" data-food-card-detail><span>{d.english}</span><span>{d.category}</span></div><div className="dish-name" data-food-card-detail><h3>{d.title}</h3><strong>{d.price} <small>هزار تومان</small></strong></div><p>{d.description}</p></article>)}</div><div className="menu-bottom"><span>مزه‌ها برای همه‌اند، قوانین نه.</span><button className="dark-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>یه میز رزرو کن <Arrow size={21}/></button></div></section>
+ <section className="experience" id="experience"><div className="experience-image" style={{backgroundImage:`url('${photos.table}')`}}/><div className="experience-cover"/><div className="experience-content"><span className="tiny-label" data-reveal>05 — THE GOOD TIMES</span><h2 data-reveal>اینجا فقط<br/>غذا نمی‌خوریم؛<br/><em>خاطره می‌سازیم.</em></h2><p data-reveal>برای قرارهای بی‌برنامه، خنده‌های بلند و شب‌هایی که دلت نمی‌خواد تموم بشن.</p><button onClick={()=>{setSubmitted(false);setReserveOpen(true)}} className="white-pill">یه جا برام نگه دار <Arrow size={20}/></button></div><span className="experience-side">FRESH STORIES EVERY DAY — TASTE LAB</span></section>
+ <section className="manifesto"><div className="manifesto-number">06 / NOT AN ORDINARY KITCHEN</div><div className="manifesto-image" style={{backgroundImage:`url('${photos.chef}')`}}/><div className="manifesto-text"><span className="tiny-label" data-reveal>EVERYTHING FROM SCRATCH</span><h2 data-reveal>کمتر تکرار،<br/><span>بیشتر خلاقیت.</span></h2><p data-reveal>مواد اولیه تازه، ترکیب‌های غیرمنتظره و تیمی که عاشق امتحان‌کردن چیزهای جدیده. هر بشقاب، امضای خودشو داره.</p><div className="manifesto-stamp" data-reveal>MADE DIFFERENTLY <span><FoodIcon kind="پاستا" size={35}/></span></div></div></section>
+ <section className="faq-section"><div className="faq-head"><span data-reveal>07 — قبل از اومدن</span><h2 data-reveal>چند سؤال خوشمزه</h2></div><div className="faq-list">{[["رزرو میز الزامیه؟","نه، بدون رزرو هم می‌تونی بیای؛ اما برای روزهای شلوغ بهتره از قبل هماهنگ کنی."],["غذای گیاهی هم دارید؟","بله. در بخش منو چند گزینه گیاهی داریم و ترکیب منو به‌صورت فصلی تغییر می‌کنه."],["این سایت امکان ثبت سفارش آنلاین داره؟","این نسخه یک دموی طراحی رستوران است؛ رزرو و پرداخت واقعی بعد از اتصال به سرویس مربوط فعال می‌شود."]].map(([q,a],i)=><div className={`faq-item ${faq===i?"expanded":""}`} key={i}><button aria-expanded={faq===i} aria-controls={"faq-answer-"+i} onClick={()=>setFaq(faq===i?-1:i)}><span>0{i+1}</span>{q}<b aria-hidden="true" className="faq-plus">+</b></button><div className="faq-answer" id={"faq-answer-"+i} aria-hidden={faq!==i}><p>{a}</p></div></div>)}</div></section>
  <section className="final-cta" id="booking"><div className="final-star"><FoodIcon kind="همه" size={80}/></div><p>فقط یه میز با یه تجربه تازه فاصله داری.</p><h2>بیا یه چیزی<br/>خوشمزه بسازیم.</h2><button onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>رزرو میز <Arrow size={27}/></button></section>
  </main><footer className="site-footer"><Brand/><div><a href="#story">درباره ما</a><a href="#menu">منوی غذا</a><a href="#experience">تجربه</a></div><div className="footer-details"><span>تهران · ایران — مکان نمایشی</span><span>© TASTE LAB 2026 — DEMO EXPERIENCE</span></div></footer>
  </div>
