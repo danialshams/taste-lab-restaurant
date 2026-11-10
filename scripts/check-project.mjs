@@ -27,7 +27,7 @@ assert(pizza.includes("for(let step=1;step<8;step++)"),"Progress must be stage-b
 assert(pizza.includes("for(let slice=1;slice<=step;slice++)"),"Every existing slice must advance together");
 assert(pizza.includes("const destination=(step-slice+1)*45"),"Wedges must settle in adjacent 45-degree positions");
 assert(pizza.includes("PIZZA_START_KEY")&&pizza.includes("PIZZA_FINISH_KEY"));
-assert(!/translate\\s*\\(/.test(pizza)&&!/radius:125/.test(pizza),"No scattering outside disc");
+assert(!/translate\s*\(/.test(pizza)&&!/radius:125/.test(pizza),"No scattering outside disc");
 for(let step=1;step<8;step++){
  for(const progress of [0,.1,.25,.5,.75,.9,1]){
   const angles=[0];
@@ -63,6 +63,7 @@ assert(pasta.includes("L109 483")&&pasta.includes("L619 483"),"Fork and spoon mu
 assert((pasta.match(/className="food-pasta-steam"/g)||[]).length===1,"Steam group must exist above food");
 assert((pasta.match(/M3[0-9]{2} 2[0-9]{2} C/g)||[]).length>=2,"Several distinct visible steam paths are required");
 assert(page.includes('pasta.classList.add("is-steaming")'),"Steam begins after pasta arrives");
+assert(page.indexOf('timeline.call(()=>pasta.classList.add("is-steaming")')>page.indexOf('timeline.fromTo(".food-pasta-garnish"'),"Steam must start after the garnish lands");
 assert(css.includes("@keyframes food-pasta-steam-rise")&&css.includes(".food-icon-steam"),"Both the plate icon and pasta need animated steam");
 assert(css.includes("width:min(225px,55vw)"),"Pizza wheel must remain compact");
 
