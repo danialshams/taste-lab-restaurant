@@ -88,7 +88,7 @@ html{scroll-behavior:auto}
 .food-pasta-link{display:inline-flex;align-items:center;gap:18px;border-bottom:1px solid #693d32;padding:8px 0;font-size:13px;transition:gap .3s ease}
 .food-pasta-link:hover{gap:26px}
 .food-pasta-link span{font:600 25px 'Space Grotesk',sans-serif}
-.food-burger-builder{overflow:visible}
+.food-burger-builder{overflow:hidden}
 .food-burger-builder:before{pointer-events:none}
 .food-burger-layer{transform-origin:center center;transform-box:fill-box}
 .food-burger-builder .food-burger-copy h2{will-change:opacity,transform}
