@@ -32,23 +32,33 @@ assert(!pizza.includes('clipPath="url(#pizza-fan-reveal-v6)"')&&!pizza.includes(
 assert(!pizza.includes('pizzaFanPath(')&&!pizza.includes('const stepInterval='),"Remove the old loader algorithms");
 assert(css.includes('.food-pizza-emerge-v7')&&css.includes('max-width:190px'),"Keep pizza compact");
 assert(css.includes('.food-pizza-emerge-v7 [data-pizza-wedge]:not('),"Hide upcoming slices until they actually emerge");
+const wedgeStyle=css.match(/\.food-pizza-emerge-v7 \[data-pizza-wedge\]\s*\{([^}]+)\}/);
+assert(wedgeStyle,"Pizza slice selector needs explicit CSS declaration");
+assert(!/transform-(?:box|origin)|transform\s*:/.test(wedgeStyle[1]),
+ "DO NOT set CSS transform-origin/transform-box on pizza wedge: it moves each 110,110 SVG pivot off-center (visually reproduced bug)");
+assert(pizza.includes('rot(g,state.angle)')&&pizza.includes('rotate("+angle.toFixed(3)+" 110 110)'),
+ "Use exactly one SVG attribute pivot at 110,110, never a competing CSS transform");
 // The train order and angle-distance constraints are pure geometry and deterministic.
 for(let i=1;i<8;i++){
  const predecessor=(i-1)*45,target=i*45;
  assert(target-predecessor===45&&target<=315,"A slice would leave the compact pizza");
 }
-assert(page.includes('CutleryCloseIcon')&&page.includes('className="menu-cutlery-close"'),"Crossed cutlery close control required");
-assert(page.includes('className="menu-burger-scene"'),"Actual burger media placement required");
-assert(page.includes('src="/media/menu-burger.png"'),"The cutout must be loaded locally");
-assert(page.includes('className="menu-burger-steam"'),"Steam must rise above actual burger");
-assert(loader.includes('export function CutleryCloseIcon')&&loader.includes('rotate(-43 24 24)')&&loader.includes('rotate(43 24 24)'),"Utensils must form the closing X");
-assert(css.includes('background:#080808!important')&&css.includes('z-index:240'),"Mobile panel must cover the header with opaque black");
-assert(css.includes('body:has(.menu-overlay.open) .site-header'),"Hide old header while mobile menu is open");
-assert(css.includes('.menu-overlay.open nav a')&&css.includes('var(--order)*.07s'),"White navigation should enter one item after another");
-assert(css.includes('@keyframes menu-real-burger-steam'),"Burger steam should move visibly");
+assert(page.includes('CutleryCloseIcon')&&page.includes('className="menu-cutlery-close"'),"Crossed spoon/fork mobile/desktop X must remain");
+assert(page.includes('className="menu-burger-photo-backdrop"'),"Large menu photo backdrop required");
+assert(page.includes('src="/media/menu-burger-steaming.jpg"'),"Menu must show photographed steam, from site's local JPEG");
+assert(!page.includes('menu-burger-steam"')&&!page.includes('menu-burger.png'),"Remove fake steam and old cutout burger");
+assert(loader.includes('export function CutleryCloseIcon')&&loader.includes('rotate(-43 24 24)')&&loader.includes('rotate(43 24 24)'),"Crossed spoon and fork required");
+const universalMenu=css.slice(css.indexOf('/* V8. Desktop and mobile share'));
+assert(universalMenu.length>1500,"New desktop + mobile unified menu styles are missing");
+assert(universalMenu.includes('background:#070707!important')&&universalMenu.includes('z-index:240!important'),"Menu must be opaque black ABOVE header at all sizes");
+assert(universalMenu.includes('body:has(.menu-overlay.open) .site-header'),"Header must disappear for BOTH mobile and desktop");
+assert(universalMenu.includes('@media(min-width:701px)'),"Desktop menu must be styled independently from mobile");
+assert(universalMenu.includes('object-fit:contain!important')&&universalMenu.includes('opacity:.40'),"Large photo must be faded to keep menu links readable");
+assert(!css.includes('menu-real-burger-steam')&&!page.includes('menu-burger-steam'),"No artificial CSS/SVG steam in menu");
+assert(css.includes('.menu-overlay.open nav a')&&css.includes('var(--order)*.07s'),"Links must enter sequentially");
 const media=read('scripts/prepare-media.mjs');
-assert(media.includes('https://commons.wikimedia.org/wiki/File:Cheeseburger.png'),"Photographic image must have grounded public-domain source");
-assert(media.includes('LOCAL_MENU_BURGER_OK')&&media.includes('bundleTransparentBurger()'),"Bundle real transparent burger into own site");
+assert(media.includes('https://www.pexels.com/photo/delicious-cheeseburger-with-smoky-atmosphere-28902885/'),"Use the verified free-use Pexels burger with steam already in the source photo");
+assert(media.includes('LOCAL_STEAMING_BURGER_OK')&&media.includes('await bundleSteamingBurger()'),"Build must bundle the correct photo locally");
 // ScrollTrigger is a once-only entry detector, NOT the driver of ingredient movement.
 const motion=page.slice(page.indexOf("function useAnimations("),page.indexOf("export default function Page()"));
 assert(motion.includes('const burgerTL=gsap.timeline({paused:true})'));
