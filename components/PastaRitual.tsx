@@ -34,16 +34,23 @@ export default function PastaRitual(){
       <circle cx="350" cy="300" r="223" stroke="#ea7968" strokeWidth="1" fill="none" opacity=".4"/>
       {Array.from({length:14},(_,i)=><path key={i} d="M350 62L350 101" stroke="#f6b9aa" strokeWidth="1.4" opacity=".4" transform={"rotate("+(i*360/14)+" 350 300)"}/>)}
     </g>
+
+    {/* Filled, continuous cutlery silhouettes: four fork tines, long solid
+        handles and highlights—not thin unrecognizable strokes. */}
     <g className="food-pasta-fork" filter="url(#pasta-shadow)">
-      <path d="M96 214V483" stroke="url(#pasta-steel)" strokeWidth="16" strokeLinecap="round"/>
-      <path d="M96 215V163 M77 174V216Q77 247 95 250Q116 246 116 216V174" stroke="url(#pasta-steel)" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <path d="M87 166V216 M106 166V216" stroke="url(#pasta-steel)" strokeWidth="7" strokeLinecap="round"/>
+      <path d="M94 239 Q94 232 101 232 Q108 232 108 239 L109 483 Q109 495 101 495 Q93 495 93 483Z" fill="url(#pasta-steel)" stroke="#6a7e81" strokeWidth="1.5"/>
+      <path d="M78 214 Q76 241 91 253 H110 Q126 241 124 214 L116 213 Q115 229 107 236 H94 Q86 229 86 213Z" fill="url(#pasta-steel)" stroke="#6b7d7e" strokeWidth="1.2"/>
+      {Array.from({length:4},(_,i)=><rect key={i} x={77+i*12} y="157" width="8" height="69" rx="4" fill="url(#pasta-steel)" stroke="#869a9a" strokeWidth=".6"/>)}
+      <path d="M98 256V473" stroke="#f8fbf9" strokeWidth="2.2" opacity=".8" strokeLinecap="round"/>
+      <ellipse cx="101" cy="483" rx="3" ry="3" fill="#ecf3f0"/>
     </g>
     <g className="food-pasta-spoon" filter="url(#pasta-shadow)">
-      <path d="M611 255V483" stroke="url(#pasta-steel)" strokeWidth="16" strokeLinecap="round"/>
-      <ellipse cx="611" cy="204" rx="28" ry="60" fill="url(#pasta-steel)"/>
-      <ellipse cx="612" cy="201" rx="17" ry="43" fill="#8d9da1" opacity=".45"/>
-      <path d="M608 157 Q621 177 619 197" fill="none" stroke="white" strokeWidth="2" opacity=".7"/>
+      <path d="M603 254 Q603 246 611 246 Q619 246 619 254 L619 483 Q619 495 611 495 Q603 495 603 483Z" fill="url(#pasta-steel)" stroke="#667b80" strokeWidth="1.5"/>
+      <path d="M611 134 C576 134 576 193 588 226 Q596 251 611 253 Q626 251 634 226 C646 193 646 134 611 134Z" fill="url(#pasta-steel)" stroke="#63767b" strokeWidth="2"/>
+      <ellipse cx="611" cy="191" rx="20" ry="46" fill="#72858a" opacity=".4"/>
+      <path d="M603 153 Q589 170 598 210" stroke="#f7faf8" strokeWidth="3" opacity=".8" fill="none" strokeLinecap="round"/>
+      <path d="M608 257V475" stroke="#f8fbf9" strokeWidth="2.2" opacity=".8" strokeLinecap="round"/>
+      <ellipse cx="611" cy="483" rx="3" ry="3" fill="#edf3f0"/>
     </g>
     <g className="food-pasta-plate" filter="url(#pasta-shadow)">
       <circle cx="350" cy="300" r="187" fill="url(#pasta-plate)"/>
@@ -68,6 +75,13 @@ export default function PastaRitual(){
       <circle cx="305" cy="318" r="8" fill="#d43f2d"/><circle cx="395" cy="316" r="7" fill="#d43f2d"/>
       <circle cx="385" cy="280" r="4" fill="#eee5cc"/>
      </g>
+    </g>
+
+    {/* Visible rising steam begins only after the spaghetti is assembled. */}
+    <g className="food-pasta-steam" fill="none" stroke="#9e6749" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M305 239 C288 220 322 207 305 187 S318 157 308 145"/>
+      <path d="M352 237 C331 217 370 205 351 183 S365 154 350 137"/>
+      <path d="M397 239 C383 219 412 205 393 185 S405 157 394 148"/>
     </g>
    </svg>
    <div className="food-pasta-scene-label" dir="ltr">01 — TABLE / 02 — PLATE / 03 — CUTLERY / 04 — PASTA</div>

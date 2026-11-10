@@ -143,3 +143,43 @@ html{scroll-behavior:auto}
  .food-pasta-ritual *,.food-burger-builder *{animation:none!important;transition:none!important}
  .food-pasta-scene svg g,.food-pasta-copy>*,.food-pasta-scene-label,.food-burger-finish,.food-burger-copy h2,.faq-item{opacity:1!important;visibility:visible!important;transform:none!important}
 }
+
+
+/* Pizza train — compact, single eight-slice disc; only SVG attribute rotations. */
+.food-pizza-disc{width:min(225px,55vw);max-width:225px}
+.food-pizza-slice{transform-origin:initial;transform-box:initial}
+.food-icon-steam path{opacity:0;transform-box:fill-box;transform-origin:center bottom;animation:food-plate-steam 2.3s ease-in-out infinite}
+.food-icon-steam path:nth-child(2){animation-delay:.65s}
+@keyframes food-plate-steam{
+ 0%{opacity:0;transform:translateY(7px)}
+ 32%{opacity:.82}
+ 75%{opacity:.34}
+ 100%{opacity:0;transform:translateY(-8px)}
+}
+/* Steam must come from the spaghetti after assembly—not disappear behind the plate. */
+.food-pasta-steam{pointer-events:none}
+.food-pasta-steam path{
+ opacity:0;
+ transform:translateY(18px);
+ transform-box:fill-box;
+ transform-origin:center bottom;
+}
+.food-pasta-ritual.is-steaming .food-pasta-steam path{
+ animation:food-pasta-steam-rise 2.65s ease-in-out infinite;
+}
+.food-pasta-ritual.is-steaming .food-pasta-steam path:nth-child(2){animation-delay:.42s}
+.food-pasta-ritual.is-steaming .food-pasta-steam path:nth-child(3){animation-delay:.82s}
+@keyframes food-pasta-steam-rise{
+ 0%{opacity:0;transform:translateY(14px) scaleX(.9)}
+ 25%{opacity:.82}
+ 65%{opacity:.6;transform:translateY(-13px) scaleX(1.08)}
+ 100%{opacity:0;transform:translateY(-30px) scaleX(.92)}
+}
+@media(max-width:600px){
+ .food-pizza-disc{width:min(207px,61vw);max-width:207px}
+ .food-pasta-steam path{stroke-width:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ .food-icon-steam path{animation:none!important;opacity:.68!important;transform:none!important}
+ .food-pasta-ritual .food-pasta-steam path{animation:none!important;opacity:.68!important;transform:none!important}
+}

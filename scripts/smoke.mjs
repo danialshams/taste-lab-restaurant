@@ -26,7 +26,7 @@ try{
  const home=await request("/");
  assert.equal(home.status,200,"The homepage should return 200");
  const html=await home.text();
- for(const marker of ["food-pasta-ritual","food-burger-builder","data-food-slice","faq-section","id=\"menu\""]){
+ for(const marker of ["food-pasta-ritual","food-burger-builder","data-food-slice","food-pasta-steam","food-pasta-fork","food-pasta-spoon","food-icon-steam","faq-section","id=\"menu\""]){
   assert(html.includes(marker),"Missing homepage feature in rendered HTML: "+marker);
  }
  for(const image of ["hero","pizza","burger","pasta","table","salad","chef","fries"]){

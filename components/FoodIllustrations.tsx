@@ -6,7 +6,7 @@ export type FoodKind="همه"|"پیتزا"|"برگر"|"ساندویچ"|"پاست
 export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
  const common={stroke:"currentColor",strokeWidth:1.8,strokeLinecap:"round" as const,strokeLinejoin:"round" as const,fill:"none"};
  const path:Record<FoodKind,React.ReactNode>={
-  "همه":<><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M9 4v10m3-10v10m3-10v10M12 14v30M39 4v40" /></>,
+  "همه":<><circle cx="24" cy="27" r="15.5"/><circle cx="24" cy="27" r="11"/><path d="M9 5v11m3-11v11m3-11v11M12 16v29M40 5v40"/><g className="food-icon-steam" strokeWidth="1.9"><path d="M20 20q-5-5 0-10t0-6"/><path d="M27 19q-5-5 0-10t0-6"/></g></>,
   "پیتزا":<><path d="M8 9Q24 3 40 9L24 43Z"/><path d="M8 9Q24 1 40 9" strokeWidth="4"/><circle cx="24" cy="20" r="3" fill="currentColor" stroke="none"/><circle cx="20" cy="13" r="2.2" fill="currentColor" stroke="none"/><circle cx="29" cy="29" r="2.8" fill="currentColor" stroke="none"/></>,
   "برگر":<><path d="M7 23C9 5 39 5 41 23Z M7 35H41M8 39Q24 44 40 39V43H8Z"/><path d="M4 29Q10 25 16 29T28 29T44 29 M7 33H41"/><path d="M16 15l2 1M25 12l2 1M33 17l2 1"/></>,
   "ساندویچ":<><path d="M6 18 24 7 42 18 24 30Z M6 25 24 37 42 25 M6 18V25 M42 18V25 M24 30V37"/><path d="M7 23 24 34 41 23" strokeDasharray="4 3"/><path d="M11 17 24 25 37 17"/></>,
@@ -16,8 +16,8 @@ export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
  return <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" className="food-icon" {...common}>{path[kind]}</svg>;
 }
 
-const PIZZA_START_KEY="taste-pizza-intro-started-v4";
-const PIZZA_FINISH_KEY="taste-pizza-intro-seen-v4";
+const PIZZA_START_KEY="taste-pizza-intro-started-v5";
+const PIZZA_FINISH_KEY="taste-pizza-intro-seen-v5";
 let pizzaPreludeStarted=false;
 
 /** All eight slices share the same origin and 45-degree geometry.
@@ -73,22 +73,37 @@ export function PizzaIntro({done}:{done:()=>void}){
   const slices=Array.from(el.querySelectorAll<SVGGElement>("[data-food-slice]"));
   const byIndex=new Map(slices.map(g=>[Number(g.dataset.foodSlice),g]));
   const rotate=(g:SVGGElement,angle:number)=>g.setAttribute("transform","rotate("+angle.toFixed(3)+" 110 110)");
-  // There is deliberately NO translation or scale change in slice travel.
+  const angles=Array.from({length:8},()=>({value:0}));
+  // Each incoming slice stays at the fixed slice's origin. Never translate,
+  // orbit outside the pizza, grow the pizza or traverse occupied finished slices.
   for(let i=1;i<8;i++){
    const g=byIndex.get(i);if(!g)continue;
-   rotate(g,0);g.style.opacity="0";
+   rotate(g,0);
+   g.style.opacity="0";
   }
   const ctx=gsap.context(()=>{
    const master=gsap.timeline({onComplete:finish});
-   for(let i=1;i<8;i++){
-    const g=byIndex.get(i);if(!g)continue;
-    const start=.32+(i-1)*.53;
-    const position={angle:0};
-    const duration=.54+i*.12;
-    master.set(g,{opacity:1},start);
-    master.to(position,{angle:i*45,duration,ease:"power2.inOut",onUpdate:()=>rotate(g,position.angle)},start);
+   const stepDuration=.36;
+   const stepInterval=.41;
+   // Windows-spinner-like TRAIN:
+   // Step 1: new slice (1) takes the first adjacent slot (45deg).
+   // Step 2: slice 1 moves to 90deg WHILE slice 2 takes 45deg.
+   // Step k: all existing slices advance one slot together, the new one
+   // emerges from beside the stationary 0deg slice. No overtaking/collisions.
+   for(let step=1;step<8;step++){
+    const t=.25+(step-1)*stepInterval;
+    const newest=byIndex.get(step);
+    if(newest)master.set(newest,{opacity:1},t);
+    for(let slice=1;slice<=step;slice++){
+     const node=byIndex.get(slice);
+     if(!node)continue;
+     const state=angles[slice];
+     const destination=(step-slice+1)*45;
+     master.to(state,{value:destination,duration:stepDuration,ease:"power1.inOut",
+       onUpdate:()=>rotate(node,state.value)},t);
+    }
    }
-   master.to(el,{opacity:0,duration:.45,ease:"power2.inOut"},"+=.42");
+   master.to(el,{opacity:0,duration:.42,ease:"power2.inOut"},"+=.42");
    timeline.current=master;
   },el);
   return()=>{ctx.revert();timeline.current=null};
