@@ -18,8 +18,8 @@ export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
 
 
 
-const PIZZA_START_KEY="taste-pizza-emerge-started-v7";
-const PIZZA_FINISH_KEY="taste-pizza-emerge-seen-v7";
+const PIZZA_START_KEY="taste-pizza-emerge-started-v8";
+const PIZZA_FINISH_KEY="taste-pizza-emerge-seen-v8";
 let pizzaEmergeStarted=false;
 
 /* A real, complete pizza wedge travels ONE 45° slot from beneath the
