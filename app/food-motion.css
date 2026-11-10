@@ -221,11 +221,11 @@ html{scroll-behavior:auto}
 }
 .food-pizza-emerge-v7 [data-pizza-wedge]:not([data-pizza-wedge="0"]){opacity:0}
 .food-pizza-emerge-v7 [data-pizza-wedge]{
+  /* SVG rotate(angle 110 110) already provides the entire pivot.
+     A CSS transform-origin here moves wedges off-centre (the screenshot bug). */
   animation:none!important;
   transition:none!important;
-  transform-box:view-box;
-  transform-origin:110px 110px;
-  will-change:transform;
+  will-change:auto;
 }
 /* The exit X uses two real utensils, not a generic close glyph. */
 .menu-cutlery-close{
