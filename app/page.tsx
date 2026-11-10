@@ -131,15 +131,10 @@ export default function Page(){
        <span>0{i+1}</span>{t}<Arrow size={36}/>
      </a>)}
    </nav>
-   <div className="menu-burger-scene" aria-label="عکس واقعی همبرگر با بخار متحرک">
-     <svg className="menu-burger-steam" viewBox="0 0 160 100" fill="none" aria-hidden="true">
-       <path d="M32 95 C5 73 56 59 31 36 S49 12 39 1"/>
-       <path d="M82 95 C60 73 110 55 83 36 S102 9 88 1"/>
-       <path d="M130 95 C103 73 150 59 126 35 S143 11 133 1"/>
-     </svg>
-     <Image className="menu-burger-photo" src="/media/menu-burger.png"
-       width={640} height={427} sizes="(max-width: 700px) 83vw, 370px" quality={82}
-       alt="عکس واقعی چیزبرگر بدون پس‌زمینه" priority/>
+   <div className="menu-burger-photo-backdrop" aria-hidden="true">
+     <Image className="menu-burger-photograph" src="/media/menu-burger-steaming.jpg"
+       fill sizes="(max-width: 700px) 100vw, 60vw" quality={84}
+       alt="" priority />
    </div>
    <div className="overlay-bottom" dir="ltr">GOOD FOOD. NO RULES. <FoodIcon kind="برگر" size={22}/></div>
  </div>
