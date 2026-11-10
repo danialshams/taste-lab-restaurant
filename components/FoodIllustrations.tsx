@@ -25,6 +25,19 @@ let pizzaEmergeStarted=false;
 /* A real, complete pizza wedge travels ONE 45° slot from beneath the
    preceding wedge. Previously seated wedges have a higher SVG paint order.
    Nothing is drawn/revealed with a clip mask. */
+export function CutleryCloseIcon({size=38}:{size?:number}){
+ return <svg className="menu-cutlery-close-icon" width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <g transform="rotate(-43 24 24)" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+   <path d="M23.9 17.2V42.5" />
+   <path d="M16 5.2V14Q16 20 24 21Q32 20 32 14V5.2" />
+   <path d="M21.2 5.2V18 M26.8 5.2V18"/>
+  </g>
+  <g transform="rotate(43 24 24)" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
+   <ellipse cx="24" cy="12" rx="6.6" ry="9.7"/>
+   <path d="M24 21.8V42.5"/>
+  </g>
+ </svg>;
+}
 function PizzaWedge({index}:{index:number}){
  const rotation="rotate("+(index*45)+" 110 110)";
  const outer="M 110 110 L 77.1 30.55 A 86 86 0 0 1 142.9 30.55 Z";
