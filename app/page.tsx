@@ -2,6 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {FoodIcon,PizzaIntro,BurgerIllustration,CutleryCloseIcon,type FoodKind} from "../components/FoodIllustrations";
 import PastaRitual from "../components/PastaRitual";
+import Image from "next/image";
 import gsap from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -136,8 +137,9 @@ export default function Page(){
        <path d="M82 95 C60 73 110 55 83 36 S102 9 88 1"/>
        <path d="M130 95 C103 73 150 59 126 35 S143 11 133 1"/>
      </svg>
-     <img className="menu-burger-photo" src="/media/menu-burger.png"
-       width={640} height={427} alt="عکس واقعی چیزبرگر بدون پس‌زمینه" loading="eager" decoding="async"/>
+     <Image className="menu-burger-photo" src="/media/menu-burger.png"
+       width={640} height={427} sizes="(max-width: 700px) 83vw, 370px" quality={82}
+       alt="عکس واقعی چیزبرگر بدون پس‌زمینه" priority/>
    </div>
    <div className="overlay-bottom" dir="ltr">GOOD FOOD. NO RULES. <FoodIcon kind="برگر" size={22}/></div>
  </div>
