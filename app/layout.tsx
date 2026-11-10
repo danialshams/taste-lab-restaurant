@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./food-motion.css";
 export const metadata: Metadata = {
   title: "TASTE LAB | آزمایشگاه طعم",
   description: "تجربه‌ای متفاوت از طعم؛ منوی خلاقانه، فضای پرانرژی و رزرو میز در TASTE LAB.",
