@@ -1,0 +1,67 @@
+/* TASTE LAB / Food-led motion system */
+body:has(.food-intro){overflow:hidden}
+.food-intro{position:fixed;inset:0;z-index:10000;background:#ed4b31;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;text-align:center;color:#fff1d8}
+.food-pizza-disc{width:min(320px,65vw);height:auto;overflow:visible;filter:drop-shadow(0 15px 22px #752f2444);margin-bottom:14px}
+.food-pizza-slice:not(.fixed){opacity:0;will-change:transform,opacity}.food-pizza-slice.fixed{opacity:1}
+.food-intro-word{font:700 clamp(30px,5vw,56px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.07em}
+.food-intro-caption{font-size:12px;letter-spacing:-.01em}
+.food-intro-skip{position:absolute;bottom:clamp(25px,5vh,65px);border:0;background:none;color:#fff0d1;border-bottom:1px solid #fff0d18f;padding:10px 0;font-size:12px}
+.food-icon{display:inline-block;flex-shrink:0;transform-origin:center;transition:transform .42s cubic-bezier(.2,1.4,.35,1)}
+.brand-star svg{color:var(--red);transform:rotate(-14deg)}.brand:hover .brand-star svg{transform:rotate(15deg) scale(1.09)}
+.menu-toggle:hover svg{transform:rotate(18deg) scale(1.08)}
+.menu-overlay nav a:hover svg{transform:translate(-5px,-4px)}
+.menu-section .menu-head i{display:inline-flex;vertical-align:middle;animation:food-wiggle 4s ease-in-out infinite}
+.menu-section .menu-head i svg{color:var(--red)}
+@keyframes food-wiggle{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-13deg)}96%{transform:rotate(11deg)}}
+.filter-row button{display:inline-flex;align-items:center;gap:9px;justify-content:center;min-height:51px;transition:background .3s,color .3s,transform .35s}
+.filter-row button svg{width:28px;height:28px;transition:transform .55s cubic-bezier(.18,1.6,.4,1)}
+.filter-row button:hover svg{transform:rotate(-15deg) scale(1.16)}
+.filter-row button.active svg{transform:rotate(11deg) scale(1.08)}
+.dish-photo-icon{display:flex;align-items:center;justify-content:center;border-radius:50%}
+.dish-photo-icon svg{transition:transform .4s}.dish-card:hover .dish-photo-icon svg{transform:rotate(16deg) scale(1.08)}
+.dish-card{animation:food-card-fade .48s cubic-bezier(.18,.8,.2,1) both}
+@keyframes food-card-fade{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.running-strip svg{width:21px;height:21px;vertical-align:middle;transform:translateY(-2px)}
+.running-strip b{display:inline-flex;align-items:center}.running-strip b svg{color:#ffd265}
+.story .tiny-label svg{vertical-align:middle;color:var(--red)}
+.manifesto-stamp>span svg{vertical-align:middle;color:var(--red)}
+.final-star{display:flex;justify-content:center;align-items:center}.final-star svg{color:var(--red)}
+.overlay-bottom span svg{vertical-align:middle}
+.food-burger-builder{height:100svh;min-height:720px;display:grid;grid-template-columns:1fr 1fr;position:relative;align-items:center;overflow:hidden;padding:clamp(35px,6vw,90px) clamp(26px,8vw,150px);background:#ffcf52;color:#211c17;isolation:isolate}
+.food-burger-builder:before{content:"";position:absolute;inset:25px;border:1px solid #211c172b;pointer-events:none}
+.food-burger-copy{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px}
+.food-burger-copy .tiny-label{font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.2em;color:#a8492d}
+.food-burger-copy h2{font-size:clamp(65px,6.3vw,116px);letter-spacing:-.085em;font-weight:900;line-height:1.2;margin:12px 0 0}
+.food-burger-copy h2 em{font-style:normal;color:#d9472c}
+.food-burger-copy p{font-size:clamp(13px,1.1vw,16px);line-height:2.3;max-width:435px;margin:5px 0 15px}
+.food-burger-labels{display:flex;flex-wrap:wrap;gap:8px;max-width:435px}
+.food-burger-labels span{border:1px solid #331e1b55;border-radius:30px;font-size:11px;padding:5px 13px}
+.food-burger-finish{font:700 11px 'Space Grotesk',sans-serif;letter-spacing:.13em;color:#9c3a25;display:block;margin-top:32px}
+.food-burger-stage{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.food-burger-stage:before{content:"";position:absolute;width:min(40vw,610px);aspect-ratio:1;border-radius:50%;background:#fff1ae;filter:blur(4px);opacity:.68;z-index:-1}
+.food-burger-art{width:min(620px,48vw);max-height:75svh;overflow:visible;filter:drop-shadow(0 24px 22px #93482224)}
+.food-burger-layer{transform-box:fill-box;transform-origin:center center}
+.food-burger-stage-note{font:600 11px 'Space Grotesk',sans-serif;letter-spacing:.15em;margin-top:10px;color:#9b4a28}
+@media(max-width:1050px){
+ .food-burger-builder{padding:50px 5vw}.food-burger-copy h2{font-size:clamp(58px,6vw,90px)}
+}
+@media(max-width:899px){
+ .food-burger-builder{grid-template-columns:1fr;min-height:850px;height:auto;padding:80px 24px 65px;gap:10px}
+ .food-burger-copy{order:0;align-items:center;text-align:center;gap:10px}
+ .food-burger-copy h2{font-size:clamp(53px,10vw,80px);line-height:1.28}
+ .food-burger-copy p{font-size:13px;margin:0}
+ .food-burger-labels{justify-content:center}.food-burger-finish{margin-top:12px}
+ .food-burger-stage{order:1}.food-burger-stage:before{width:min(90vw,440px)}
+ .food-burger-art{width:min(95vw,480px);max-height:none;margin-top:-8px}
+ .food-burger-stage-note{font-size:9px}
+}
+@media(max-width:700px){
+ .food-intro{gap:11px}.food-pizza-disc{width:min(300px,71vw)}.food-intro-caption{font-size:11px}
+ .filter-row{gap:8px!important}.filter-row button{gap:6px;padding:10px 14px}.filter-row button svg{width:24px;height:24px}
+ .food-burger-builder:before{inset:12px}.food-burger-labels span{font-size:10px}
+ .site-header .menu-toggle{margin-right:0}.site-header .book-pill{margin-left:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ .food-icon,.dish-card,.menu-section .menu-head i{animation:none!important;transition:none!important}
+ .food-burger-layer{opacity:1!important;transform:none!important}
+}
