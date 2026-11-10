@@ -2,7 +2,6 @@
 body:has(.food-intro){overflow:hidden}
 .food-intro{position:fixed;inset:0;z-index:10000;background:#ed4b31;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;text-align:center;color:#fff1d8}
 .food-pizza-disc{width:min(320px,65vw);height:auto;overflow:visible;filter:drop-shadow(0 15px 22px #752f2444);margin-bottom:14px}
-.food-pizza-slice:not(.fixed){opacity:0;will-change:transform,opacity}.food-pizza-slice.fixed{opacity:1}
 .food-intro-word{font:700 clamp(30px,5vw,56px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.07em}
 .food-intro-caption{font-size:12px;letter-spacing:-.01em}
 .food-intro-skip{position:absolute;bottom:clamp(25px,5vh,65px);border:0;background:none;color:#fff0d1;border-bottom:1px solid #fff0d18f;padding:10px 0;font-size:12px}
@@ -69,9 +68,6 @@ body:has(.food-intro){overflow:hidden}
 
 /* V4: sequential pizza, auto-play burger, and the pasta table ritual. */
 html{scroll-behavior:auto}
-.food-pizza-slice{transform-origin:110px 110px}
-.food-pizza-slice:not(.fixed){opacity:0}
-.food-pizza-slice.fixed{opacity:1}
 .food-pizza-disc{filter:drop-shadow(0 10px 15px #60251433)}
 .food-pasta-ritual{min-height:100svh;position:relative;display:grid;grid-template-columns:minmax(0,57%) minmax(0,43%);align-items:center;overflow:hidden;background:#f6e6cc;color:#2a241c;direction:ltr;padding:95px clamp(22px,4vw,75px) 80px}
 .food-pasta-ritual:before{content:"";position:absolute;inset:25px;border:1px solid #a97f532b;pointer-events:none}
@@ -147,7 +143,6 @@ html{scroll-behavior:auto}
 
 /* Pizza train — compact, single eight-slice disc; only SVG attribute rotations. */
 .food-pizza-disc{width:min(225px,55vw);max-width:225px}
-.food-pizza-slice{transform-origin:initial;transform-box:initial}
 .food-icon-steam path{opacity:0;transform-box:fill-box;transform-origin:center bottom;animation:food-plate-steam 2.3s ease-in-out infinite}
 .food-icon-steam path:nth-child(2){animation-delay:.65s}
 @keyframes food-plate-steam{
@@ -182,4 +177,32 @@ html{scroll-behavior:auto}
 @media(prefers-reduced-motion:reduce){
  .food-icon-steam path{animation:none!important;opacity:.68!important;transform:none!important}
  .food-pasta-ritual .food-pasta-steam path{animation:none!important;opacity:.68!important;transform:none!important}
+}
+
+
+/* Fresh fan reveal: exactly one stationary top wedge and one expanding mask.
+   The seven other wedges are permanently parked in their final sectors.
+   No CSS transform of slices, no orbital jumps, no detached circles. */
+.food-intro .food-pizza-fan-v6{
+ width:min(190px,54vw)!important;
+ max-width:190px!important;
+ height:auto;
+ overflow:visible;
+ display:block;
+ flex-shrink:0;
+ filter:drop-shadow(0 8px 11px #5b251b36);
+}
+.food-pizza-fan-v6 [data-pizza-wedge],
+.food-pizza-fan-v6 [data-pizza-fixed-wedge],
+.food-pizza-fan-v6 [data-pizza-hidden-wedges]{
+ transition:none!important;
+ animation:none!important;
+ will-change:auto!important;
+}
+.food-pizza-fan-v6 [data-pizza-fan-aperture]{
+ transition:none!important;
+ animation:none!important;
+}
+@media(max-width:600px){
+ .food-intro .food-pizza-fan-v6{width:min(175px,55vw)!important;max-width:175px!important}
 }

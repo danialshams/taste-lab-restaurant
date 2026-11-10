@@ -16,29 +16,43 @@ export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
  return <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" className="food-icon" {...common}>{path[kind]}</svg>;
 }
 
-const PIZZA_START_KEY="taste-pizza-intro-started-v5";
-const PIZZA_FINISH_KEY="taste-pizza-intro-seen-v5";
-let pizzaPreludeStarted=false;
 
-/** All eight slices share the same origin and 45-degree geometry.
- * Completed slices are painted ON TOP of a new slice. The new slice travels
- * BEHIND completed wedges; no scattering, radial excursions or visible collisions. */
-function PizzaDisc(){
+const PIZZA_START_KEY="taste-pizza-fan-started-v6";
+const PIZZA_FINISH_KEY="taste-pizza-fan-seen-v6";
+let pizzaFanStarted=false;
+
+// A single expanding fan-shaped clip reveals seven pre-aligned wedges.
+// The source slice never moves; the remaining pieces NEVER translate,
+// rotate or scale. No trajectory can produce a detached / scattered slice.
+const PIZZA_CX=110;
+const PIZZA_CY=110;
+const PIZZA_REVEAL_RADIUS=98;
+const PIZZA_START_DEG=22.5;
+function pizzaFanPoint(angle:number){
+ const rad=angle*Math.PI/180;
+ return [
+  (PIZZA_CX+PIZZA_REVEAL_RADIUS*Math.sin(rad)).toFixed(3),
+  (PIZZA_CY-PIZZA_REVEAL_RADIUS*Math.cos(rad)).toFixed(3)
+ ];
+}
+function pizzaFanPath(degrees:number){
+ const sweep=Math.max(0,Math.min(315,degrees));
+ const p0=pizzaFanPoint(PIZZA_START_DEG);
+ if(sweep===0)return "M110 110 L"+p0[0]+" "+p0[1]+" Z";
+ const p1=pizzaFanPoint(PIZZA_START_DEG+sweep);
+ const largeArc=sweep>180?1:0;
+ return "M110 110 L"+p0[0]+" "+p0[1]+" A98 98 0 "+largeArc+" 1 "+p1[0]+" "+p1[1]+" Z";
+}
+function PizzaWedge({index}:{index:number}){
+ const rotate="rotate("+(index*45)+" 110 110)";
  const outer="M 110 110 L 77.1 30.55 A 86 86 0 0 1 142.9 30.55 Z";
  const cheese="M 110 110 L 81.3 40.71 A 75 75 0 0 1 138.7 40.71 Z";
  const crust="M 77.1 30.55 A 86 86 0 0 1 142.9 30.55";
- const order=[7,6,5,4,3,2,1,0]; // SVG painter order, fixed source on top.
- return <svg className="food-pizza-disc" viewBox="0 0 220 220" role="img" aria-label="پیتزای هشت‌تکه که هر برش از اسلایس اولیه ساخته می‌شود">
- <defs>
-  <linearGradient id="food-pizza-cheese" x1="0%" y1="0%" x2="75%" y2="100%"><stop offset="0" stopColor="#fff5ba"/><stop offset=".55" stopColor="#f7ba43"/><stop offset="1" stopColor="#e88e29"/></linearGradient>
-  <linearGradient id="food-pizza-bread" x1="0%" y1="0%" x2="80%" y2="100%"><stop offset="0" stopColor="#f8c278"/><stop offset=".55" stopColor="#b97039"/><stop offset="1" stopColor="#ed9c43"/></linearGradient>
-  <filter id="food-pizza-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2.4" stdDeviation="2.3" floodColor="#612b18" floodOpacity=".19"/></filter>
- </defs>
- {order.map(i=><g key={i} data-food-slice={i} className={"food-pizza-slice"+(i===0?" fixed":"")} transform={i===0?undefined:"rotate(0 110 110)"}>
-  <g filter="url(#food-pizza-shadow)">
+ return <g data-pizza-wedge={index} transform={rotate}>
+  <g filter="url(#pizza-fan-shadow-v6)">
    <path d={outer} fill="#b54d29" stroke="#903e23" strokeWidth="1.6"/>
-   <path d={cheese} fill="url(#food-pizza-cheese)" stroke="#f3ce74" strokeWidth="1.4"/>
-   <path d={crust} fill="none" stroke="url(#food-pizza-bread)" strokeWidth="12.5" strokeLinecap="round"/>
+   <path d={cheese} fill="url(#pizza-fan-cheese-v6)" stroke="#f3ce74" strokeWidth="1.4"/>
+   <path d={crust} fill="none" stroke="url(#pizza-fan-bread-v6)" strokeWidth="12.5" strokeLinecap="round"/>
    <path d={crust} fill="none" stroke="#ffdda0" strokeWidth="2.3" opacity=".8"/>
    <ellipse cx="110" cy="48" rx="9" ry="9.5" fill="#ba3427" stroke="#ee7b51" strokeWidth="2"/>
    <circle cx="99" cy="76" r="7.6" fill="#ac3024" stroke="#e57940" strokeWidth="1.4"/>
@@ -47,11 +61,35 @@ function PizzaDisc(){
    <ellipse cx="91" cy="55" rx="5" ry="2.5" fill="#fff2c1" opacity=".8" transform="rotate(-35 91 55)"/>
    <circle cx="116" cy="65" r="2.8" fill="#ffe7a0"/>
   </g>
- </g>)}
+ </g>;
+}
+function PizzaFanDisc(){
+ return <svg className="food-pizza-disc food-pizza-fan-v6" viewBox="0 0 220 220" role="img" aria-label="یک برش ثابت در بالا و هفت برش که پیوسته از کنار آن آشکار می‌شوند و یک پیتزای هشت‌تکه می‌سازند">
+  <defs>
+   <linearGradient id="pizza-fan-cheese-v6" x1="0%" y1="0%" x2="75%" y2="100%">
+    <stop offset="0" stopColor="#fff5ba"/><stop offset=".55" stopColor="#f7ba43"/><stop offset="1" stopColor="#e88e29"/>
+   </linearGradient>
+   <linearGradient id="pizza-fan-bread-v6" x1="0%" y1="0%" x2="80%" y2="100%">
+    <stop offset="0" stopColor="#f8c278"/><stop offset=".55" stopColor="#b97039"/><stop offset="1" stopColor="#ed9c43"/>
+   </linearGradient>
+   <filter id="pizza-fan-shadow-v6" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="2.4" stdDeviation="2.3" floodColor="#612b18" floodOpacity=".19"/>
+   </filter>
+   <clipPath id="pizza-fan-reveal-v6" clipPathUnits="userSpaceOnUse">
+    <path data-pizza-fan-aperture d={pizzaFanPath(0)}/>
+   </clipPath>
+  </defs>
+  <g clipPath="url(#pizza-fan-reveal-v6)" data-pizza-hidden-wedges>
+   {Array.from({length:7},(_,i)=><PizzaWedge index={i+1} key={i+1}/>)}
+  </g>
+  {/* Draw the first slice last so it always stays visible above the opening fan. */}
+  <g data-pizza-fixed-wedge><PizzaWedge index={0}/></g>
  </svg>;
 }
 export function PizzaIntro({done}:{done:()=>void}){
- const root=useRef<HTMLDivElement>(null),finished=useRef(false),timeline=useRef<ReturnType<typeof gsap.timeline>|null>(null);
+ const root=useRef<HTMLDivElement>(null);
+ const finished=useRef(false);
+ const timeline=useRef<ReturnType<typeof gsap.timeline>|null>(null);
  const [show,setShow]=useState(true);
  const finish=useCallback(()=>{
   if(finished.current)return;
@@ -62,60 +100,46 @@ export function PizzaIntro({done}:{done:()=>void}){
   done();
  },[done]);
  useEffect(()=>{
-  const el=root.current;if(!el)return;
-  let already=false;
-  try{already=sessionStorage.getItem(PIZZA_FINISH_KEY)==="1"||sessionStorage.getItem(PIZZA_START_KEY)==="1"}catch{}
-  if(already||pizzaPreludeStarted||matchMedia("(prefers-reduced-motion: reduce)").matches){
-   const id=requestAnimationFrame(finish);return()=>cancelAnimationFrame(id);
+  const rootEl=root.current;
+  if(!rootEl)return;
+  let seen=false;
+  try{seen=sessionStorage.getItem(PIZZA_FINISH_KEY)==="1"||sessionStorage.getItem(PIZZA_START_KEY)==="1"}catch{}
+  if(seen||pizzaFanStarted||window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+   const id=requestAnimationFrame(finish);
+   return()=>cancelAnimationFrame(id);
   }
-  pizzaPreludeStarted=true;
+  const aperture=rootEl.querySelector<SVGPathElement>("[data-pizza-fan-aperture]");
+  if(!aperture){const id=requestAnimationFrame(finish);return()=>cancelAnimationFrame(id)}
+  pizzaFanStarted=true;
   try{sessionStorage.setItem(PIZZA_START_KEY,"1")}catch{}
-  const slices=Array.from(el.querySelectorAll<SVGGElement>("[data-food-slice]"));
-  const byIndex=new Map(slices.map(g=>[Number(g.dataset.foodSlice),g]));
-  const rotate=(g:SVGGElement,angle:number)=>g.setAttribute("transform","rotate("+angle.toFixed(3)+" 110 110)");
-  const angles=Array.from({length:8},()=>({value:0}));
-  // Each incoming slice stays at the fixed slice's origin. Never translate,
-  // orbit outside the pizza, grow the pizza or traverse occupied finished slices.
-  for(let i=1;i<8;i++){
-   const g=byIndex.get(i);if(!g)continue;
-   rotate(g,0);
-   g.style.opacity="0";
-  }
+  const fan={degrees:0};
+  // Only the aperture path is animated. Every wedge remains fixed in its
+  // final 45-degree position and is progressively uncovered from the source.
+  const draw=()=>aperture.setAttribute("d",pizzaFanPath(fan.degrees));
   const ctx=gsap.context(()=>{
    const master=gsap.timeline({onComplete:finish});
-   const stepDuration=.36;
-   const stepInterval=.41;
-   // Windows-spinner-like TRAIN:
-   // Step 1: new slice (1) takes the first adjacent slot (45deg).
-   // Step 2: slice 1 moves to 90deg WHILE slice 2 takes 45deg.
-   // Step k: all existing slices advance one slot together, the new one
-   // emerges from beside the stationary 0deg slice. No overtaking/collisions.
-   for(let step=1;step<8;step++){
-    const t=.25+(step-1)*stepInterval;
-    const newest=byIndex.get(step);
-    if(newest)master.set(newest,{opacity:1},t);
-    for(let slice=1;slice<=step;slice++){
-     const node=byIndex.get(slice);
-     if(!node)continue;
-     const state=angles[slice];
-     const destination=(step-slice+1)*45;
-     master.to(state,{value:destination,duration:stepDuration,ease:"power1.inOut",
-       onUpdate:()=>rotate(node,state.value)},t);
-    }
+   for(let slice=1;slice<=7;slice++){
+    master.to(fan,{
+     degrees:slice*45,
+     duration:.37,
+     ease:"power1.inOut",
+     onUpdate:draw
+    });
    }
-   master.to(el,{opacity:0,duration:.42,ease:"power2.inOut"},"+=.42");
+   master.to(rootEl,{opacity:0,duration:.44,ease:"power2.inOut"},"+=.36");
    timeline.current=master;
-  },el);
+  },rootEl);
   return()=>{ctx.revert();timeline.current=null};
  },[finish]);
  if(!show)return null;
- return <div className="food-intro" ref={root} role="status" aria-label="در حال تشکیل پیتزا از هشت برش">
-  <PizzaDisc/>
+ return <div className="food-intro" ref={root} role="status" aria-label="در حال بازشدن هشت برش پیتزا">
+  <PizzaFanDisc/>
   <div className="food-intro-word" dir="ltr">TASTE LAB</div>
-  <span className="food-intro-caption">از یه برش شروع می‌شه، با هشت برش کامل می‌شه.</span>
+  <span className="food-intro-caption">یک برش، بعد یکی دیگه؛ تا پیتزا کامل بشه.</span>
   <button type="button" onClick={finish} className="food-intro-skip">عبور از مقدمه</button>
  </div>;
 }
+
 export function BurgerIllustration(){
  return <svg className="food-burger-art" viewBox="0 0 520 540" role="img" aria-label="لایه‌های برگر که هنگام ورود به بخش خودکار از بالا کنار هم قرار می‌گیرند">
  <defs>

@@ -15,37 +15,44 @@ assert((page.match(/\/media\/\w+\.jpg/g)||[]).length===8,"All eight local food p
 assert(existsSync("scripts/prepare-media.mjs"),"The local media bundler is required");
 assert(layout.includes('food-motion.css'),"Food motion CSS must load");
 
-// All wedges share a pivot, appear at the source, and advance as a synchronized
-// TRAIN: for each new wedge the already-created ones shift precisely 45 degrees.
-// At every intermediate frame there is one wedge-width gap between moving wedges.
-const pizza=loader.slice(loader.indexOf("function PizzaDisc()"),loader.indexOf("export function BurgerIllustration()"));
-assert(pizza.includes("const order=[7,6,5,4,3,2,1,0]"));
-assert(pizza.includes("data-food-slice={i}"));
-assert(pizza.includes('transform={i===0?undefined:"rotate(0 110 110)"}'));
-assert(pizza.includes("const stepDuration=.36")&&pizza.includes("const stepInterval=.41"));
-assert(pizza.includes("for(let step=1;step<8;step++)"),"Progress must be stage-based rather than one long independent orbit");
-assert(pizza.includes("for(let slice=1;slice<=step;slice++)"),"Every existing slice must advance together");
-assert(pizza.includes("const destination=(step-slice+1)*45"),"Wedges must settle in adjacent 45-degree positions");
-assert(pizza.includes("PIZZA_START_KEY")&&pizza.includes("PIZZA_FINISH_KEY"));
-assert(!/translate\s*\(/.test(pizza)&&!/radius:125/.test(pizza),"No scattering outside disc");
-for(let step=1;step<8;step++){
- for(const progress of [0,.1,.25,.5,.75,.9,1]){
-  const angles=[0];
-  for(let slice=1;slice<=step;slice++){
-    const from=(step-slice)*45;
-    const to=(step-slice+1)*45;
-    angles.push(from+(to-from)*progress);
-  }
-  // Before and during each step, earlier moving slices stay exactly one wedge
-  // apart from later ones. There can be no crossovers, gaps or teleportation.
-  const moving=angles.slice(1).sort((x,y)=>x-y);
-  for(let i=1;i<moving.length;i++){
-    assert(Math.abs(moving[i]-moving[i-1]-45)<1e-8,
-      "Pizza train has overlapping or separated moving wedges");
-  }
-  assert(angles.every(x=>x>=0&&x<=315),"Slice escaped the pizza's circular perimeter");
- }
+// QA: the loader uses ONE angular aperture; eight real wedges are stationary
+// and already perfectly aligned. The mask opens in seven contiguous 45deg arcs.
+// Verify the actual production geometry helpers rather than merely matching text.
+assert(loader.includes("const PIZZA_START_DEG=22.5"),"Fan must start at right edge of the fixed top slice");
+assert(loader.includes("const PIZZA_REVEAL_RADIUS=98"),"Mask must cover crust without escaping SVG bounds");
+assert(loader.includes("Array.from({length:7}"),"Seven hidden slices required");
+assert(loader.includes("<PizzaWedge index={0}/>"),"One permanently visible top source slice required");
+assert(loader.includes("data-pizza-fan-aperture"),"Only the angular mask should be animated");
+assert(loader.includes('clipPath="url(#pizza-fan-reveal-v6)"'),"Moving reveal must clip all seven stationary wedges");
+assert(loader.includes("degrees:slice*45"),"Fan must open by adjacent wedge sectors");
+assert(loader.includes("for(let slice=1;slice<=7;slice++)"),"Exactly seven sequential phases");
+assert(!loader.includes("const stepInterval=")&&!loader.includes("const destination=")&&!loader.includes("radius:125"),"Remove old scattered spinner algorithm");
+const beginning=loader.indexOf("const PIZZA_CX=");
+const ending=loader.indexOf("function PizzaWedge(",beginning);
+assert(beginning>=0&&ending>beginning,"Angular aperture helper missing");
+const helpers=loader.slice(beginning,ending)
+ .replace("function pizzaFanPoint(angle:number)","function pizzaFanPoint(angle)")
+ .replace("function pizzaFanPath(degrees:number)","function pizzaFanPath(degrees)");
+const {runInNewContext}=await import("node:vm");
+const pathFor=runInNewContext(helpers+"\npizzaFanPath");
+function p(deg){
+ const rad=deg*Math.PI/180;
+ return [110+98*Math.sin(rad),110-98*Math.cos(rad)];
 }
+for(const sweep of [0,2.5,18,45,77,90,135,180,225,270,315]){
+ const actual=pathFor(sweep);
+ assert(actual.startsWith("M110 110 L"),"Fan mask must always pivot from center");
+ if(sweep===0){assert(!actual.includes(" A98 "));continue}
+ const match=actual.match(/A98 98 0 ([01]) 1 ([0-9.]+) ([0-9.]+) Z$/);
+ assert(match,"Fan arc command missing at "+sweep);
+ const [x,y]=p(22.5+sweep);
+ assert(Math.abs(Number(match[2])-x)<.002&&Math.abs(Number(match[3])-y)<.002,
+  "Aperture endpoint not on fixed-radius arc at "+sweep);
+ assert(Number(match[1])===(sweep>180?1:0),
+  "SVG large-arc-flag must change once sweep exceeds 180");
+}
+assert(!css.includes(".food-pizza-slice"),"Remove stale motion on previous DOM wedges");
+assert(css.includes(".food-pizza-fan-v6")&&css.includes("max-width:190px!important"),"The new pizza must stay compact");
 // ScrollTrigger is a once-only entry detector, NOT the driver of ingredient movement.
 const motion=page.slice(page.indexOf("function useAnimations("),page.indexOf("export default function Page()"));
 assert(motion.includes('const burgerTL=gsap.timeline({paused:true})'));
