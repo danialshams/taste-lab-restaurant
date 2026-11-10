@@ -80,6 +80,7 @@ function useAnimations(ready:boolean){
     const noodles=gsap.utils.toArray<SVGGElement>(".food-pasta-noodle");
     timeline.fromTo(noodles,{y:-220,autoAlpha:0,rotation:-8},{y:0,autoAlpha:1,rotation:0,duration:.72,stagger:.105,ease:"back.out(1.03)"},1.77);
     timeline.fromTo(".food-pasta-garnish",{scale:.45,autoAlpha:0,transformOrigin:"50% 50%"},{scale:1,autoAlpha:1,duration:.48,ease:"back.out(1.4)"},3.44);
+    timeline.call(()=>pasta.classList.add("is-steaming"),[],3.9);
     timeline.fromTo(".food-pasta-copy > *",{autoAlpha:0,y:26},{autoAlpha:1,y:0,stagger:.13,duration:.68,ease:"power3.out"},3.55);
     timeline.fromTo(".food-pasta-scene-label",{autoAlpha:0},{autoAlpha:1,duration:.4},3.75);
     ScrollTrigger.create({
@@ -98,6 +99,7 @@ function useAnimations(ready:boolean){
   ScrollTrigger.refresh();
   return()=>{
     ctx.revert();
+    document.querySelector(".food-pasta-ritual")?.classList.remove("is-steaming");
     if(tick)gsap.ticker.remove(tick);
     lenis?.destroy();
   };
