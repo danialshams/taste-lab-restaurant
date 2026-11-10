@@ -48,54 +48,46 @@ async function download(name, original) {
 }
 await Promise.all(Object.entries(originals).map(([name, url]) => download(name, url)));
 
-// Genuine food photograph on transparent background (not AI-generated).
-// Public domain / National Cancer Institute, photographer Renee Comet:
-// https://commons.wikimedia.org/wiki/File:Cheeseburger.png
-// Store a local copy during builds so mobile browsers never depend on Wikimedia.
-async function bundleTransparentBurger() {
-  const name="menu-burger.png";
-  const target=join(folder,name);
-  try { if ((await stat(target)).size>35000) {
-    console.log("LOCAL_MENU_BURGER_OK already bundled");
+// Authentic free-use stock photograph published by Pedro Furtado on Pexels.
+// This image already shows visible steam rising from a cheeseburger on a dark
+// background. Do NOT add artificial SVG/CSS steam to the menu.
+// Source: https://www.pexels.com/photo/delicious-cheeseburger-with-smoky-atmosphere-28902885/
+// License: https://www.pexels.com/license/
+async function bundleSteamingBurger() {
+  const target=join(folder,"menu-burger-steaming.jpg");
+  try { if ((await stat(target)).size>30000) {
+    console.log("LOCAL_STEAMING_BURGER_OK reused bundled photo");
     return;
   }} catch {}
   const sources=[
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Cheeseburger.png/640px-Cheeseburger.png",
-    "https://upload.wikimedia.org/wikipedia/commons/1/11/Cheeseburger.png"
+    "https://images.pexels.com/photos/28902885/pexels-photo-28902885.jpeg?auto=compress&cs=tinysrgb&w=1400&q=86",
+    "https://images.pexels.com/photos/28902885/pexels-photo-28902885.jpeg"
   ];
   let lastError;
   for(const source of sources){
     for(let attempt=1;attempt<=3;attempt++){
-      try{
+      try {
         const response=await fetch(source,{
-          headers:{"User-Agent":"TasteLabFoodPortfolio/1.0 (https://taste-lab-restaurant.vercel.app)","Accept":"image/png,image/*;q=0.8"},
+          headers:{"User-Agent":"Mozilla/5.0 (compatible; TasteLabPortfolio/1.0)","Accept":"image/jpeg,image/*"},
           signal:AbortSignal.timeout(24000)
         });
         if(!response.ok)throw new Error("HTTP "+response.status);
-        if(!(response.headers.get("content-type")||"").includes("image/png"))
-          throw new Error("Expected authentic PNG, received "+response.headers.get("content-type"));
+        if(!(response.headers.get("content-type")||"").startsWith("image/"))
+          throw new Error("Expected food photograph, got "+response.headers.get("content-type"));
         const bytes=Buffer.from(await response.arrayBuffer());
-        const pngMagic="89504e470d0a1a0a";
-        if(bytes.length<35000||bytes.subarray(0,8).toString("hex")!==pngMagic)
-          throw new Error("Corrupt or empty photograph");
-        // The cutout is a PNG with a transparency-bearing color type (RGBA or
-        // grayscale+alpha); do not substitute a white-backed JPEG.
-        const colorType=bytes[25];
-        if(colorType!==6&&colorType!==4&&colorType!==3)
-          throw new Error("Source PNG has no supported transparent color type: "+colorType);
+        if(bytes.length<30000 || bytes[0]!==0xFF || bytes[1]!==0xD8)
+          throw new Error("Incomplete or non-JPEG stock photo");
         await writeFile(target,bytes);
-        console.log("LOCAL_MENU_BURGER_OK real photographic transparent PNG ("+
-          Math.round(bytes.length/1024)+" KiB)");
+        console.log("LOCAL_STEAMING_BURGER_OK Pexels genuine photograph ("+Math.round(bytes.length/1024)+" KiB)");
         return;
       }catch(error){
         lastError=error;
-        if(attempt<3)await new Promise(resolve=>setTimeout(resolve,600*attempt));
+        if(attempt<3)await new Promise(resolve=>setTimeout(resolve,450*attempt));
       }
     }
   }
-  throw new Error("Cannot bundle real transparent Wikimedia burger photograph: "+lastError);
+  throw new Error("Unable to bundle real steaming burger photograph: "+lastError);
 }
-
-await bundleTransparentBurger();
+await bundleSteamingBurger();
 if (completed.length !== Object.keys(originals).length) throw new Error("Media preflight incomplete");
 console.log(`LOCAL_MEDIA_COMPLETE ${completed.length} locally bundled photographs`);
