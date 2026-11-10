@@ -1,0 +1,12 @@
+import {readFileSync,existsSync} from "node:fs";
+import assert from "node:assert/strict";
+const page=readFileSync("app/page.tsx","utf8");
+const css=readFileSync("app/globals.css","utf8");
+assert(!page.includes("https://images.unsplash.com"),"Browser must use first-party images only");
+assert.equal((page.match(/\/media\/\w+\.jpg/g)||[]).length,8);
+assert(existsSync("scripts/prepare-media.mjs"));
+assert(css.includes("flex-direction:row-reverse"),"Mobile menu must be on right");
+assert(page.includes("pizza-piece"));
+assert(page.includes("Array.from({length:8}"));
+assert(css.includes("pizza-slice-spiral"));
+console.log("Structural regression checks passed");
