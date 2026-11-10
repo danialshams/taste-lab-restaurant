@@ -51,7 +51,7 @@ function PizzaDisc(){
  </svg>;
 }
 export function PizzaIntro({done}:{done:()=>void}){
- const root=useRef<HTMLDivElement>(null),finished=useRef(false),timeline=useRef<gsap.core.Timeline|null>(null);
+ const root=useRef<HTMLDivElement>(null),finished=useRef(false),timeline=useRef<ReturnType<typeof gsap.timeline>|null>(null);
  const [show,setShow]=useState(true);
  const finish=useCallback(()=>{
   if(finished.current)return;
@@ -102,7 +102,7 @@ export function PizzaIntro({done}:{done:()=>void}){
  </div>;
 }
 export function BurgerIllustration(){
- return <svg className="food-burger-art" viewBox="0 0 520 540" role="img" aria-label="لایه‌های واقعی برگر که با اسکرول از بالا کنار هم قرار می‌گیرند">
+ return <svg className="food-burger-art" viewBox="0 0 520 540" role="img" aria-label="لایه‌های برگر که هنگام ورود به بخش خودکار از بالا کنار هم قرار می‌گیرند">
  <defs>
   <linearGradient id="bun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f8c379"/><stop offset=".55" stopColor="#df923c"/><stop offset="1" stopColor="#be712e"/></linearGradient>
   <linearGradient id="meat" x1="0" y1="0" x2=".5" y2="1"><stop stopColor="#723720"/><stop offset="1" stopColor="#3f1d18"/></linearGradient>
