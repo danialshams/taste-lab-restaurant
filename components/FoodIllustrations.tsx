@@ -15,22 +15,31 @@ export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
  };
  return <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" className="food-icon" {...common}>{path[kind]}</svg>;
 }
-function PizzaDisc({active}:{active:boolean}){
+
+const PIZZA_START_KEY="taste-pizza-intro-started-v4";
+const PIZZA_FINISH_KEY="taste-pizza-intro-seen-v4";
+let pizzaPreludeStarted=false;
+
+/** All eight slices share the same origin and 45-degree geometry.
+ * Completed slices are painted ON TOP of a new slice. The new slice travels
+ * BEHIND completed wedges; no scattering, radial excursions or visible collisions. */
+function PizzaDisc(){
  const outer="M 110 110 L 77.1 30.55 A 86 86 0 0 1 142.9 30.55 Z";
  const cheese="M 110 110 L 81.3 40.71 A 75 75 0 0 1 138.7 40.71 Z";
  const crust="M 77.1 30.55 A 86 86 0 0 1 142.9 30.55";
- return <svg className={`food-pizza-disc ${active?"is-active":""}`} viewBox="0 0 220 220" role="img" aria-label="یک برش ثابت و هفت برش متحرک با مواد غذایی واقعی که از برش اول منشأ می‌گیرند">
+ const order=[7,6,5,4,3,2,1,0]; // SVG painter order, fixed source on top.
+ return <svg className="food-pizza-disc" viewBox="0 0 220 220" role="img" aria-label="پیتزای هشت‌تکه که هر برش از اسلایس اولیه ساخته می‌شود">
  <defs>
-  <linearGradient id="food-pizza-cheese" x1="0" y1="0" x2=".9" y2="1"><stop offset="0" stopColor="#fff5ba"/><stop offset=".55" stopColor="#f7ba43"/><stop offset="1" stopColor="#e88e29"/></linearGradient>
-  <linearGradient id="food-pizza-bread" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f8c278"/><stop offset=".55" stopColor="#b97039"/><stop offset="1" stopColor="#ed9c43"/></linearGradient>
-  <filter id="food-pizza-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#612b18" floodOpacity=".2"/></filter>
+  <linearGradient id="food-pizza-cheese" x1="0%" y1="0%" x2="75%" y2="100%"><stop offset="0" stopColor="#fff5ba"/><stop offset=".55" stopColor="#f7ba43"/><stop offset="1" stopColor="#e88e29"/></linearGradient>
+  <linearGradient id="food-pizza-bread" x1="0%" y1="0%" x2="80%" y2="100%"><stop offset="0" stopColor="#f8c278"/><stop offset=".55" stopColor="#b97039"/><stop offset="1" stopColor="#ed9c43"/></linearGradient>
+  <filter id="food-pizza-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2.4" stdDeviation="2.3" floodColor="#612b18" floodOpacity=".19"/></filter>
  </defs>
- {Array.from({length:8},(_,i)=><g key={i} className={`food-pizza-slice ${i===0?"fixed":""}`} data-food-slice={i}>
-  <g transform={`rotate(${i*45} 110 110)`} filter="url(#food-pizza-shadow)">
-   <path d={outer} fill="#bb5128" stroke="#8a3f24" strokeWidth="1.6"/>
-   <path d={cheese} fill="url(#food-pizza-cheese)" stroke="#f3ce74" strokeWidth="1.3"/>
+ {order.map(i=><g key={i} data-food-slice={i} className={"food-pizza-slice"+(i===0?" fixed":"")} transform={i===0?undefined:"rotate(0 110 110)"}>
+  <g filter="url(#food-pizza-shadow)">
+   <path d={outer} fill="#b54d29" stroke="#903e23" strokeWidth="1.6"/>
+   <path d={cheese} fill="url(#food-pizza-cheese)" stroke="#f3ce74" strokeWidth="1.4"/>
    <path d={crust} fill="none" stroke="url(#food-pizza-bread)" strokeWidth="12.5" strokeLinecap="round"/>
-   <path d={crust} fill="none" stroke="#ffdda0" strokeWidth="2.3" opacity=".75"/>
+   <path d={crust} fill="none" stroke="#ffdda0" strokeWidth="2.3" opacity=".8"/>
    <ellipse cx="110" cy="48" rx="9" ry="9.5" fill="#ba3427" stroke="#ee7b51" strokeWidth="2"/>
    <circle cx="99" cy="76" r="7.6" fill="#ac3024" stroke="#e57940" strokeWidth="1.4"/>
    <circle cx="124" cy="82" r="7.5" fill="#af3422" stroke="#ee7b41" strokeWidth="1.2"/>
@@ -42,44 +51,54 @@ function PizzaDisc({active}:{active:boolean}){
  </svg>;
 }
 export function PizzaIntro({done}:{done:()=>void}){
- const root=useRef<HTMLDivElement>(null),finished=useRef(false);
- const [show,setShow]=useState(true),[active,setActive]=useState(false);
- const finish=useCallback(()=>{if(finished.current)return;finished.current=true;try{sessionStorage.setItem("taste-intro-v3","seen")}catch{};setShow(false);done()},[done]);
+ const root=useRef<HTMLDivElement>(null),finished=useRef(false),timeline=useRef<gsap.core.Timeline|null>(null);
+ const [show,setShow]=useState(true);
+ const finish=useCallback(()=>{
+  if(finished.current)return;
+  finished.current=true;
+  try{sessionStorage.setItem(PIZZA_FINISH_KEY,"1")}catch{}
+  timeline.current?.kill();
+  setShow(false);
+  done();
+ },[done]);
  useEffect(()=>{
   const el=root.current;if(!el)return;
-  let seen=false;try{seen=sessionStorage.getItem("taste-intro-v3")==="seen"}catch{}
-  if(seen||matchMedia("(prefers-reduced-motion: reduce)").matches){const f=requestAnimationFrame(finish);return()=>cancelAnimationFrame(f)}
-  setActive(true);
+  let already=false;
+  try{already=sessionStorage.getItem(PIZZA_FINISH_KEY)==="1"||sessionStorage.getItem(PIZZA_START_KEY)==="1"}catch{}
+  if(already||pizzaPreludeStarted||matchMedia("(prefers-reduced-motion: reduce)").matches){
+   const id=requestAnimationFrame(finish);return()=>cancelAnimationFrame(id);
+  }
+  pizzaPreludeStarted=true;
+  try{sessionStorage.setItem(PIZZA_START_KEY,"1")}catch{}
   const slices=Array.from(el.querySelectorAll<SVGGElement>("[data-food-slice]"));
-  const render=(g:SVGGElement,i:number,angle:number,radius:number,opacity:number)=>{
-   const radians=angle*Math.PI/180;
-   const x=(radius-44)*Math.sin(radians),y=-(radius-44)*Math.cos(radians);
-   g.setAttribute("transform",`translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${(angle-i*45).toFixed(2)} 110 110)`);
-   g.style.opacity=String(opacity);
-  };
-  slices.forEach((g,i)=>{if(i>0)render(g,i,0,44,0)});
+  const byIndex=new Map(slices.map(g=>[Number(g.dataset.foodSlice),g]));
+  const rotate=(g:SVGGElement,angle:number)=>g.setAttribute("transform","rotate("+angle.toFixed(3)+" 110 110)");
+  // There is deliberately NO translation or scale change in slice travel.
+  for(let i=1;i<8;i++){
+   const g=byIndex.get(i);if(!g)continue;
+   rotate(g,0);g.style.opacity="0";
+  }
   const ctx=gsap.context(()=>{
    const master=gsap.timeline({onComplete:finish});
    for(let i=1;i<8;i++){
-    const g=slices[i];if(!g)continue;
-    const state={angle:0,radius:44,opacity:0};
-    const update=()=>render(g,i,state.angle,state.radius,state.opacity);
-    const segment=gsap.timeline();
-    segment.to(state,{radius:125,opacity:1,duration:.17,ease:"power2.out",onUpdate:update})
-     .to(state,{angle:i*45,duration:.43,ease:"power1.inOut",onUpdate:update})
-     .to(state,{radius:44,duration:.22,ease:"power3.inOut",onUpdate:update});
-    master.add(segment,(i-1)*.55+.12);
+    const g=byIndex.get(i);if(!g)continue;
+    const start=.32+(i-1)*.53;
+    const position={angle:0};
+    const duration=.54+i*.12;
+    master.set(g,{opacity:1},start);
+    master.to(position,{angle:i*45,duration,ease:"power2.inOut",onUpdate:()=>rotate(g,position.angle)},start);
    }
-   master.to(el,{opacity:0,duration:.47,ease:"power2.inOut"},"+=.35");
+   master.to(el,{opacity:0,duration:.45,ease:"power2.inOut"},"+=.42");
+   timeline.current=master;
   },el);
-  return()=>ctx.revert();
+  return()=>{ctx.revert();timeline.current=null};
  },[finish]);
  if(!show)return null;
- return <div className={`food-intro ${active?"food-intro--active":""}`} ref={root} role="status" aria-label="در حال تشکیل پیتزای هشت‌تکه">
-  <PizzaDisc active={active}/>
+ return <div className="food-intro" ref={root} role="status" aria-label="در حال تشکیل پیتزا از هشت برش">
+  <PizzaDisc/>
   <div className="food-intro-word" dir="ltr">TASTE LAB</div>
-  <span className="food-intro-caption">یه برش شروع می‌کنه؛ هشت برش یه داستان می‌سازن.</span>
-  <button onClick={finish} className="food-intro-skip">عبور از مقدمه</button>
+  <span className="food-intro-caption">از یه برش شروع می‌شه، با هشت برش کامل می‌شه.</span>
+  <button type="button" onClick={finish} className="food-intro-skip">عبور از مقدمه</button>
  </div>;
 }
 export function BurgerIllustration(){
