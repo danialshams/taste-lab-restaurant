@@ -26,7 +26,7 @@ try{
  const home=await request("/");
  assert.equal(home.status,200,"The homepage should return 200");
  const html=await home.text();
- for(const marker of ["food-pasta-ritual","food-burger-builder","data-pizza-wedge=\"0\"","data-pizza-wedge=\"7\"","menu-cutlery-close-icon","menu-burger-steam","menu-burger-photo","menu-burger-scene","food-pasta-steam","food-pasta-fork","food-pasta-spoon","food-icon-steam","faq-section","id=\"menu\""]){
+ for(const marker of ["food-pasta-ritual","food-burger-builder","data-pizza-wedge=\"0\"","data-pizza-wedge=\"7\"","menu-cutlery-close-icon","menu-burger-photo-backdrop","menu-burger-photograph","menu-cutlery-close","food-pasta-steam","food-pasta-fork","food-pasta-spoon","food-icon-steam","faq-section","id=\"menu\""]){
   assert(html.includes(marker),"Missing homepage feature in rendered HTML: "+marker);
  }
  for(const image of ["hero","pizza","burger","pasta","table","salad","chef","fries"]){
@@ -36,23 +36,21 @@ try{
   const bytes=(await response.arrayBuffer()).byteLength;
   assert(bytes>10000,"Suspiciously small local image: "+image+" / "+bytes);
  }
-  const cutout=await request("/media/menu-burger.png");
-  assert.equal(cutout.status,200,"Real transparent burger photo unavailable on site's own domain");
-  assert((cutout.headers.get("content-type")||"").includes("image/png"),"Hamburger must remain PNG");
-  const picture=Buffer.from(await cutout.arrayBuffer());
-  assert(picture.length>35000,"Hamburger source image is too small");
-  assert.equal(picture.subarray(0,8).toString("hex"),"89504e470d0a1a0a","Hamburger file is not a real PNG");
-  assert([3,4,6].includes(picture[25]),"Hamburger photo must support transparency");
-  console.log("Real photographic burger PNG OK ("+picture.length+" bytes)");
-  const optimized=await request("/_next/image?url=%2Fmedia%2Fmenu-burger.png&w=640&q=82");
-  assert.equal(optimized.status,200,"Mobile responsive Next.js burger image optimization failed");
-  assert((optimized.headers.get("content-type")||"").startsWith("image/"),
-    "Optimized burger image missing valid image media type");
-  const mobileBytes=(await optimized.arrayBuffer()).byteLength;
-  assert(mobileBytes>15000&&mobileBytes<picture.length,
-    "Mobile burger image must transfer fewer bytes than original photograph");
-  console.log("Mobile optimized burger OK: "+mobileBytes+" of "+picture.length+" bytes");
-
+ const photo=await request("/media/menu-burger-steaming.jpg");
+ assert.equal(photo.status,200,"Genuine steaming cheeseburger photograph must load from same domain");
+ assert((photo.headers.get("content-type")||"").startsWith("image/"),"Burger photo must remain an actual image");
+ const bytes=Buffer.from(await photo.arrayBuffer());
+ assert(bytes.length>30000,"Steaming hamburger photograph suspiciously small");
+ assert(bytes[0]===0xFF&&bytes[1]===0xD8,"Steaming hamburger photo must be JPEG");
+ console.log("Steaming cheeseburger photograph OK ("+bytes.length+" bytes)");
+ const resized=await request("/_next/image?url=%2Fmedia%2Fmenu-burger-steaming.jpg&w=640&q=84");
+ assert.equal(resized.status,200,"Responsive Next.js burger image optimization failed");
+ assert((resized.headers.get("content-type")||"").startsWith("image/"),
+   "Optimized burger did not return valid image");
+ const compressedBytes=(await resized.arrayBuffer()).byteLength;
+ assert(compressedBytes>9000&&compressedBytes<bytes.length,
+   "Optimized steaming photo should be smaller than source");
+ console.log("Optimized steaming burger photo OK: "+compressedBytes+" of "+bytes.length+" bytes");
  console.log("Production smoke passed: homepage and all eight real local images, pizza, burger and pasta scene");
 }finally{
  server.kill("SIGTERM");
