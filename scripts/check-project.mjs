@@ -15,44 +15,40 @@ assert((page.match(/\/media\/\w+\.jpg/g)||[]).length===8,"All eight local food p
 assert(existsSync("scripts/prepare-media.mjs"),"The local media bundler is required");
 assert(layout.includes('food-motion.css'),"Food motion CSS must load");
 
-// QA: the loader uses ONE angular aperture; eight real wedges are stationary
-// and already perfectly aligned. The mask opens in seven contiguous 45deg arcs.
-// Verify the actual production geometry helpers rather than merely matching text.
-assert(loader.includes("const PIZZA_START_DEG=22.5"),"Fan must start at right edge of the fixed top slice");
-assert(loader.includes("const PIZZA_REVEAL_RADIUS=98"),"Mask must cover crust without escaping SVG bounds");
-assert(loader.includes("Array.from({length:7}"),"Seven hidden slices required");
-assert(loader.includes("<PizzaWedge index={0}/>"),"One permanently visible top source slice required");
-assert(loader.includes("data-pizza-fan-aperture"),"Only the angular mask should be animated");
-assert(loader.includes('clipPath="url(#pizza-fan-reveal-v6)"'),"Moving reveal must clip all seven stationary wedges");
-assert(loader.includes("degrees:slice*45"),"Fan must open by adjacent wedge sectors");
-assert(loader.includes("for(let slice=1;slice<=7;slice++)"),"Exactly seven sequential phases");
-assert(!loader.includes("const stepInterval=")&&!loader.includes("const destination=")&&!loader.includes("radius:125"),"Remove old scattered spinner algorithm");
-const beginning=loader.indexOf("const PIZZA_CX=");
-const ending=loader.indexOf("function PizzaWedge(",beginning);
-assert(beginning>=0&&ending>beginning,"Angular aperture helper missing");
-const helpers=loader.slice(beginning,ending)
- .replace("function pizzaFanPoint(angle:number)","function pizzaFanPoint(angle)")
- .replace("function pizzaFanPath(degrees:number)","function pizzaFanPath(degrees)");
-const {runInNewContext}=await import("node:vm");
-const pathFor=runInNewContext(helpers+"\npizzaFanPath");
-function p(deg){
- const rad=deg*Math.PI/180;
- return [110+98*Math.sin(rad),110-98*Math.cos(rad)];
+
+/* V7: individual FULL pizza slices travel only one 45-degree slot from under
+ * their immediate predecessor. No angular mask or drawing reveal.
+ * Painted from 7 to 0 means predecessors naturally cover new slices at spawn. */
+const pizza=loader.slice(loader.indexOf('const PIZZA_START_KEY='),loader.indexOf('export function BurgerIllustration()'));
+assert(pizza.includes('taste-pizza-emerge-started-v7'),"New intro version must play in fresh sessions");
+assert(pizza.includes('Array.from({length:8},(_,i)=>7-i)'),"Reverse SVG paint order required");
+assert(pizza.includes('data-pizza-wedge={index}'),"All eight textured wedges must exist");
+assert(pizza.includes('translate(110 110) scale(.955 1) translate(-110 -110)'),"Add a slight gap without changing slice details");
+assert(pizza.includes('const previous=states[i-1]')||pizza.includes('previous=states[i-1]'),"Every slice starts under its predecessor");
+assert(pizza.includes('state.angle=previous.angle'),"Animate the actual slice from the preceding slice");
+assert(pizza.includes('angle:i*45'),"Each slice must move only one sector to its final position");
+assert(pizza.includes('const cadence=.51')&&pizza.includes('const slideDuration=.57'),"Use close, overlapping train timings");
+assert(!pizza.includes('clipPath="url(#pizza-fan-reveal-v6)"')&&!pizza.includes('data-pizza-fan-aperture'),"Remove the previous drawing/mask technique");
+assert(!pizza.includes('pizzaFanPath(')&&!pizza.includes('const stepInterval='),"Remove the old loader algorithms");
+assert(css.includes('.food-pizza-emerge-v7')&&css.includes('max-width:190px'),"Keep pizza compact");
+assert(css.includes('.food-pizza-emerge-v7 [data-pizza-wedge]:not('),"Hide upcoming slices until they actually emerge");
+// The train order and angle-distance constraints are pure geometry and deterministic.
+for(let i=1;i<8;i++){
+ const predecessor=(i-1)*45,target=i*45;
+ assert(target-predecessor===45&&target<=315,"A slice would leave the compact pizza");
 }
-for(const sweep of [0,2.5,18,45,77,90,135,180,225,270,315]){
- const actual=pathFor(sweep);
- assert(actual.startsWith("M110 110 L"),"Fan mask must always pivot from center");
- if(sweep===0){assert(!actual.includes(" A98 "));continue}
- const match=actual.match(/A98 98 0 ([01]) 1 ([0-9.]+) ([0-9.]+) Z$/);
- assert(match,"Fan arc command missing at "+sweep);
- const [x,y]=p(22.5+sweep);
- assert(Math.abs(Number(match[2])-x)<.002&&Math.abs(Number(match[3])-y)<.002,
-  "Aperture endpoint not on fixed-radius arc at "+sweep);
- assert(Number(match[1])===(sweep>180?1:0),
-  "SVG large-arc-flag must change once sweep exceeds 180");
-}
-assert(!css.includes(".food-pizza-slice"),"Remove stale motion on previous DOM wedges");
-assert(css.includes(".food-pizza-fan-v6")&&css.includes("max-width:190px!important"),"The new pizza must stay compact");
+assert(page.includes('CutleryCloseIcon')&&page.includes('className="menu-cutlery-close"'),"Crossed cutlery close control required");
+assert(page.includes('className="menu-burger-scene"'),"Actual burger media placement required");
+assert(page.includes('src="/media/menu-burger.png"'),"The cutout must be loaded locally");
+assert(page.includes('className="menu-burger-steam"'),"Steam must rise above actual burger");
+assert(loader.includes('export function CutleryCloseIcon')&&loader.includes('rotate(-43 24 24)')&&loader.includes('rotate(43 24 24)'),"Utensils must form the closing X");
+assert(css.includes('background:#080808!important')&&css.includes('z-index:240'),"Mobile panel must cover the header with opaque black");
+assert(css.includes('body:has(.menu-overlay.open) .site-header'),"Hide old header while mobile menu is open");
+assert(css.includes('.menu-overlay.open nav a')&&css.includes('var(--order)*.07s'),"White navigation should enter one item after another");
+assert(css.includes('@keyframes menu-real-burger-steam'),"Burger steam should move visibly");
+const media=read('scripts/prepare-media.mjs');
+assert(media.includes('https://commons.wikimedia.org/wiki/File:Cheeseburger.png'),"Photographic image must have grounded public-domain source");
+assert(media.includes('LOCAL_MENU_BURGER_OK')&&media.includes('bundleTransparentBurger()'),"Bundle real transparent burger into own site");
 // ScrollTrigger is a once-only entry detector, NOT the driver of ingredient movement.
 const motion=page.slice(page.indexOf("function useAnimations("),page.indexOf("export default function Page()"));
 assert(motion.includes('const burgerTL=gsap.timeline({paused:true})'));
