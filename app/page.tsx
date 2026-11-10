@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {FoodIcon,PizzaIntro,BurgerIllustration,type FoodKind} from "../components/FoodIllustrations";
+import {FoodIcon,PizzaIntro,BurgerIllustration,CutleryCloseIcon,type FoodKind} from "../components/FoodIllustrations";
 import PastaRitual from "../components/PastaRitual";
 import gsap from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
@@ -112,8 +112,35 @@ export default function Page(){
  useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"){close();setReserveOpen(false)}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey)},[]);
  useEffect(()=>{document.body.style.overflow=navOpen||reserveOpen?"hidden":"";return()=>{document.body.style.overflow=""}},[navOpen,reserveOpen]);
  return <><PizzaIntro done={finishIntro}/><div className={`site-wrap ${ready?"site-ready":""}`} id="top">
- <header className="site-header"><Brand/><div className="header-links"><a href="#story">داستان ما</a><a href="#menu">منوی غذا</a><a href="#pasta-ritual">پاستا</a><a href="#experience">تجربه</a></div><div className="header-actions"><button className="book-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>رزرو میز <Arrow size={17}/></button><button className={"menu-toggle"+(navOpen?" is-open":"")} aria-label={navOpen?"بستن منو":"باز کردن منوی پیتزایی"} aria-expanded={navOpen} onClick={()=>setNavOpen(v=>!v)}><FoodIcon kind="پیتزا" size={29}/><span>{navOpen?"بستن":"منو"}</span></button></div></header>
- <div className={`menu-overlay ${navOpen?"open":""}`} aria-hidden={!navOpen}><div className="menu-overlay-top"><span>MENU / 01</span><button onClick={close}>بستن ✕</button></div><nav aria-label="ناوبری سایت">{[["خانه","#top"],["داستان ما","#story"],["منوی غذا","#menu"],["مراسم پاستا","#pasta-ritual"],["تجربه لب","#experience"],["رزرو میز","#booking"]].map(([t,h],i)=><a key={h} style={{"--order":i} as React.CSSProperties} href={h} onClick={e=>{close();if(h==="#booking"){e.preventDefault();setSubmitted(false);setReserveOpen(true)}}}><span>0{i+1}</span>{t}<Arrow size={36}/></a>)}</nav><div className="overlay-bottom">GOOD FOOD. NO RULES. <span><FoodIcon kind="پیتزا" size={24}/></span></div></div>
+ <header className="site-header"><Brand/><div className="header-links"><a href="#story">داستان ما</a><a href="#menu">منوی غذا</a><a href="#pasta-ritual">پاستا</a><a href="#experience">تجربه</a></div><div className="header-actions"><button className="book-pill" onClick={()=>{setSubmitted(false);setReserveOpen(true)}}>رزرو میز <Arrow size={17}/></button><button className={"menu-toggle"+(navOpen?" is-open":"")} aria-label={navOpen?"بستن منو":"باز کردن منوی پیتزایی"} aria-expanded={navOpen} aria-controls="taste-menu" onClick={()=>setNavOpen(v=>!v)}><FoodIcon kind="پیتزا" size={29}/><span>{navOpen?"بستن":"منو"}</span></button></div></header>
+ <div className={`menu-overlay ${navOpen?"open":""}`} id="taste-menu" aria-hidden={!navOpen}>
+   <div className="menu-overlay-top">
+     <span dir="ltr">TASTE LAB / MENU</span>
+     <button type="button" className="menu-cutlery-close" onClick={close} aria-label="بستن منو" tabIndex={navOpen?0:-1}>
+       <CutleryCloseIcon size={38}/><span>بستن</span>
+     </button>
+   </div>
+   <nav aria-label="ناوبری سایت">
+     {[
+       ["خانه","#top"],["داستان ما","#story"],["منوی غذا","#menu"],
+       ["مراسم پاستا","#pasta-ritual"],["تجربه لب","#experience"],["رزرو میز","#booking"]
+     ].map(([t,h],i)=><a key={h} tabIndex={navOpen?0:-1}
+       style={{"--order":i} as React.CSSProperties} href={h}
+       onClick={e=>{close();if(h==="#booking"){e.preventDefault();setSubmitted(false);setReserveOpen(true)}}}>
+       <span>0{i+1}</span>{t}<Arrow size={36}/>
+     </a>)}
+   </nav>
+   <div className="menu-burger-scene" aria-label="عکس واقعی همبرگر با بخار متحرک">
+     <svg className="menu-burger-steam" viewBox="0 0 160 100" fill="none" aria-hidden="true">
+       <path d="M32 95 C5 73 56 59 31 36 S49 12 39 1"/>
+       <path d="M82 95 C60 73 110 55 83 36 S102 9 88 1"/>
+       <path d="M130 95 C103 73 150 59 126 35 S143 11 133 1"/>
+     </svg>
+     <img className="menu-burger-photo" src="/media/menu-burger.png"
+       width={640} height={427} alt="عکس واقعی چیزبرگر بدون پس‌زمینه" loading="eager" decoding="async"/>
+   </div>
+   <div className="overlay-bottom" dir="ltr">GOOD FOOD. NO RULES. <FoodIcon kind="برگر" size={22}/></div>
+ </div>
  <main>
  <section className="hero" aria-labelledby="hero-title"><div className="hero-picture"><div className="hero-photo" style={{backgroundImage:`linear-gradient(90deg,rgba(15,15,13,.42),rgba(15,15,13,.04)),url('${photos.hero}')`}}/><div className="hero-overlay"/><div className="hero-index">TASTE LAB / FRESH & BOLD / 2026</div><div className="hero-center"><div className="hero-eyebrow" data-reveal>خوشمزه‌تر از چیزی که فکر می‌کنی <span><FoodIcon kind="پیتزا" size={23}/></span></div><h1 id="hero-title" className="hero-heading"><span>طعم رو</span><span className="hero-heading-outline">زندگی کن.</span></h1><p className="hero-lead">اینجا غذا یه قانون نداره؛ یه ماجراجوییه.</p><a href="#menu" className="hero-round-cta" aria-label="کشف منو"><Arrow size={34}/><span>کشف منو</span></a></div><div className="hero-footer"><span>۰۱ / ۰۷</span><span>برای کشف بیشتر اسکرول کن ↓</span><span>GOOD FOOD. NO RULES.</span></div></div></section>
  <div className="running-strip" aria-hidden="true"><div>{Array.from({length:4},(_,i)=><span key={i}>JUST ONE MORE SLICE <b><FoodIcon kind="پیتزا" size={23}/></b> MADE WITH LOVE <b><FoodIcon kind="همه" size={23}/></b> NO BORING BITES <b><FoodIcon kind="برگر" size={23}/></b></span>)}</div></div>
