@@ -20,14 +20,14 @@ assert(layout.includes('food-motion.css'),"Food motion CSS must load");
  * their immediate predecessor. No angular mask or drawing reveal.
  * Painted from 7 to 0 means predecessors naturally cover new slices at spawn. */
 const pizza=loader.slice(loader.indexOf('const PIZZA_START_KEY='),loader.indexOf('export function BurgerIllustration()'));
-assert(pizza.includes('taste-pizza-emerge-started-v9'),"New intro version must play in fresh sessions");
+assert(pizza.includes('taste-pizza-emerge-started-v10'),"New intro version must play in fresh sessions");
 assert(pizza.includes('Array.from({length:8},(_,i)=>7-i)'),"Reverse SVG paint order required");
 assert(pizza.includes('data-pizza-wedge={index}'),"All eight textured wedges must exist");
 assert(pizza.includes('translate(110 110) scale(.955 1) translate(-110 -110)'),"Add a slight gap without changing slice details");
-assert(pizza.includes('rot(g,0)')&&pizza.includes('const targetAngle=(8-i)*45'),"All wedges emerge under fixed top slice and head toward successive empty sectors");
-assert(pizza.includes('const degreesPerSecond=245'),"Use predictable circular movement speed");
-assert(pizza.includes('startAt+=Math.max(.18,travelTime-.22)'),"Start next piece before previous piece finishes");
-for(let i=1;i<8;i++){const target=(8-i)*45;assert(target<=315&&target>=45&&target%45===0,"Invalid pizza destination sector")}
+assert(pizza.includes('rot(g,(i-1)*45)')&&pizza.includes('const targetAngle=i*45'),"Each piece must emerge under its settled predecessor and rotate one sector");
+assert(pizza.includes('const moveDuration=.52'),"Use consistent smooth short sector moves");
+assert(pizza.includes('const startAt=.2+(i-1)*.57'),"Slice moves must be genuinely sequential, not radial sweeps");
+for(let i=1;i<8;i++){const target=i*45;assert(target<=315&&target>=45&&target%45===0,"Invalid pizza destination sector")}
 assert(!pizza.includes('clipPath="url(#pizza-fan-reveal-v6)"')&&!pizza.includes('data-pizza-fan-aperture'),"Remove the previous drawing/mask technique");
 assert(!pizza.includes('pizzaFanPath(')&&!pizza.includes('const stepInterval='),"Remove the old loader algorithms");
 assert(css.includes('.food-pizza-emerge-v7')&&css.includes('max-width:190px'),"Keep pizza compact");
