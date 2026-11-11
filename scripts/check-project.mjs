@@ -20,14 +20,14 @@ assert(layout.includes('food-motion.css'),"Food motion CSS must load");
  * their immediate predecessor. No angular mask or drawing reveal.
  * Painted from 7 to 0 means predecessors naturally cover new slices at spawn. */
 const pizza=loader.slice(loader.indexOf('const PIZZA_START_KEY='),loader.indexOf('export function BurgerIllustration()'));
-assert(pizza.includes('taste-pizza-emerge-started-v8'),"New intro version must play in fresh sessions");
+assert(pizza.includes('taste-pizza-emerge-started-v9'),"New intro version must play in fresh sessions");
 assert(pizza.includes('Array.from({length:8},(_,i)=>7-i)'),"Reverse SVG paint order required");
 assert(pizza.includes('data-pizza-wedge={index}'),"All eight textured wedges must exist");
 assert(pizza.includes('translate(110 110) scale(.955 1) translate(-110 -110)'),"Add a slight gap without changing slice details");
-assert(pizza.includes('const previous=states[i-1]')||pizza.includes('previous=states[i-1]'),"Every slice starts under its predecessor");
-assert(pizza.includes('state.angle=previous.angle'),"Animate the actual slice from the preceding slice");
-assert(pizza.includes('angle:i*45'),"Each slice must move only one sector to its final position");
-assert(pizza.includes('const cadence=.51')&&pizza.includes('const slideDuration=.57'),"Use close, overlapping train timings");
+assert(pizza.includes('rot(g,0)')&&pizza.includes('const targetAngle=(8-i)*45'),"All wedges emerge under fixed top slice and head toward successive empty sectors");
+assert(pizza.includes('const degreesPerSecond=245'),"Use predictable circular movement speed");
+assert(pizza.includes('startAt+=Math.max(.18,travelTime-.22)'),"Start next piece before previous piece finishes");
+for(let i=1;i<8;i++){const target=(8-i)*45;assert(target<=315&&target>=45&&target%45===0,"Invalid pizza destination sector")}
 assert(!pizza.includes('clipPath="url(#pizza-fan-reveal-v6)"')&&!pizza.includes('data-pizza-fan-aperture'),"Remove the previous drawing/mask technique");
 assert(!pizza.includes('pizzaFanPath(')&&!pizza.includes('const stepInterval='),"Remove the old loader algorithms");
 assert(css.includes('.food-pizza-emerge-v7')&&css.includes('max-width:190px'),"Keep pizza compact");
@@ -87,4 +87,6 @@ assert(!page.includes("✳"),"Remove non-food decorative stars");
 assert(css.includes(".food-pasta-ritual")&&css.includes(".food-burger-builder{overflow:hidden}"));
 assert(base.includes("flex-direction:row-reverse"),"Mobile menu control remains right-aligned");
 
-console.log("TASTE LAB V4 structural and motion-flow checks passed");
+assert(css.includes(".food-burger-builder:before,.food-pasta-ritual:before{display:none!important"),"Remove visual framing around both scenes");
+assert(css.includes("width:min(100%,455px)")&&css.includes("width:min(100%,465px)"),"Center and constrain both food SVGs on mobile");
+console.log("TASTE LAB V9 structural and motion-flow checks passed");
