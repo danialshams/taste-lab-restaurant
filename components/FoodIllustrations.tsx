@@ -18,8 +18,8 @@ export function FoodIcon({kind,size=35}:{kind:FoodKind;size?:number}) {
 
 
 
-const PIZZA_START_KEY="taste-pizza-emerge-started-v9";
-const PIZZA_FINISH_KEY="taste-pizza-emerge-seen-v9";
+const PIZZA_START_KEY="taste-pizza-emerge-started-v10";
+const PIZZA_FINISH_KEY="taste-pizza-emerge-seen-v10";
 let pizzaEmergeStarted=false;
 
 /* A real, complete pizza wedge travels ONE 45° slot from beneath the
@@ -98,34 +98,29 @@ export function PizzaIntro({done}:{done:()=>void}){
   try{sessionStorage.setItem(PIZZA_START_KEY,"1")}catch{}
   const rot=(g:SVGGElement,angle:number)=>g.setAttribute("transform","rotate("+angle.toFixed(3)+" 110 110)");
   const states=Array.from({length:8},()=>({angle:0}));
-  // The fixed top slice is the ONLY origin. Each subsequent whole wedge
-  // starts directly beneath it, travels clockwise to the furthest still
-  // empty sector, and the next begins BEFORE the previous arrives.
+  // Each whole wedge begins precisely UNDER the preceding seated wedge,
+  // then rotates only one 45-degree sector into its final position.
+  // The first wedge remains fixed; the seven others assemble the circle in order.
   for(let i=1;i<8;i++){
    const g=byIndex.get(i);if(!g)continue;
-   rot(g,0);g.style.opacity="0";
+   rot(g,(i-1)*45);g.style.opacity="0";
+   states[i].angle=(i-1)*45;
   }
   const ctx=gsap.context(()=>{
    const master=gsap.timeline({onComplete:finish});
-   const degreesPerSecond=245;
-   let startAt=.24;
+   const moveDuration=.52;
    for(let i=1;i<8;i++){
     const g=byIndex.get(i),state=states[i];
     if(!g)continue;
-    // The first wedge reaches 315 degrees, next reaches 270, ... last 45.
-    // Earlier wedges settle farther around the same SMALL pizza circle.
-    const targetAngle=(8-i)*45;
-    const travelTime=targetAngle/degreesPerSecond;
+    const targetAngle=i*45;
+    const startAt=.2+(i-1)*.57;
     master.set(g,{opacity:1},startAt);
     master.to(state,{
-      angle:targetAngle,duration:travelTime,ease:"none",
+      angle:targetAngle,duration:moveDuration,ease:"power2.inOut",
       onUpdate:()=>rot(g,state.angle)
     },startAt);
-    // A new wedge emerges from UNDER the fixed top source just before the
-    // preceding wedge arrives, rather than waiting for it to stop.
-    startAt+=Math.max(.18,travelTime-.22);
    }
-   master.to(rootEl,{opacity:0,duration:.42,ease:"power2.inOut"},"+=.42");
+   master.to(rootEl,{opacity:0,duration:.42,ease:"power2.inOut"},"+=.46");
    timeline.current=master;
   },rootEl);
   return()=>{ctx.revert();timeline.current=null};
