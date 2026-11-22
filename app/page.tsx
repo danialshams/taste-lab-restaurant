@@ -35,7 +35,11 @@ function useAnimations(ready:boolean){
   if(!ready)return;
   gsap.registerPlugin(ScrollTrigger);
   const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if(reduced)return;
+  const ua=navigator.userAgent;
+  const oldIOS=/iP(?:hone|ad|od)/.test(ua)&&/OS (?:[0-9]|1[0-5])_/.test(ua);
+  const memory=(navigator as Navigator & {deviceMemory?:number}).deviceMemory;
+  if(reduced||oldIOS||(typeof memory==="number"&&memory<=2)||
+     (navigator.hardwareConcurrency>0&&navigator.hardwareConcurrency<=2))return;
   let lenis:Lenis|undefined, tick:((t:number)=>void)|undefined;
   if(window.matchMedia("(pointer:fine)").matches){
    lenis=new Lenis({duration:1.02,smoothWheel:true,anchors:true});
@@ -134,7 +138,7 @@ export default function Page(){
    <div className="menu-burger-photo-backdrop" aria-hidden="true">
      <Image className="menu-burger-photograph" src="/media/menu-burger-steaming.jpg"
        fill sizes="(max-width: 700px) 100vw, 60vw" quality={84}
-       alt="" priority />
+       alt="" loading="lazy" />
    </div>
    <div className="overlay-bottom" dir="ltr">GOOD FOOD. NO RULES. <FoodIcon kind="برگر" size={22}/></div>
  </div>
