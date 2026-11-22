@@ -87,7 +87,12 @@ export function PizzaIntro({done}:{done:()=>void}){
   const rootEl=root.current;if(!rootEl)return;
   let seen=false;
   try{seen=sessionStorage.getItem(PIZZA_FINISH_KEY)==="1"||sessionStorage.getItem(PIZZA_START_KEY)==="1"}catch{}
-  if(seen||pizzaEmergeStarted||window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const ua=navigator.userAgent;
+  const oldIOS=/iP(?:hone|ad|od)/.test(ua)&&/OS (?:[0-9]|1[0-5])_/.test(ua);
+  const memory=(navigator as Navigator & {deviceMemory?:number}).deviceMemory;
+  if(seen||pizzaEmergeStarted||oldIOS||(typeof memory==="number"&&memory<=2)||
+     (navigator.hardwareConcurrency>0&&navigator.hardwareConcurrency<=2)||
+     window.matchMedia("(prefers-reduced-motion: reduce)").matches){
    const id=requestAnimationFrame(finish);return()=>cancelAnimationFrame(id);
   }
   const svg=rootEl.querySelector<SVGSVGElement>(".food-pizza-emerge-v7");
@@ -106,6 +111,8 @@ export function PizzaIntro({done}:{done:()=>void}){
    rot(g,(i-1)*45);g.style.opacity="0";
    states[i].angle=(i-1)*45;
   }
+  // The intro must never trap the visitor if animation or GPU stalls.
+  const safety=window.setTimeout(finish,6400);
   const ctx=gsap.context(()=>{
    const master=gsap.timeline({onComplete:finish});
    const moveDuration=.52;
@@ -123,7 +130,7 @@ export function PizzaIntro({done}:{done:()=>void}){
    master.to(rootEl,{opacity:0,duration:.42,ease:"power2.inOut"},"+=.46");
    timeline.current=master;
   },rootEl);
-  return()=>{ctx.revert();timeline.current=null};
+  return()=>{window.clearTimeout(safety);ctx.revert();timeline.current=null};
  },[finish]);
  if(!show)return null;
  return <div className="food-intro" ref={root} role="status" aria-label="در حال ساخته‌شدن پیتزای هشت‌تکه">
